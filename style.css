@@ -1,15 +1,53 @@
 body {
+  margin: 0;
+  background: #f7f3ea;
+  color: #1f1a17;
   font-family: Georgia, serif;
-  max-width: 700px;
-  margin: 80px auto;
-  line-height: 1.6;
-  font-size: 20px;
+  line-height: 1.65;
+}
+
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 80px 24px 100px;
 }
 
 h1 {
-  font-size: 48px;
+  font-size: 56px;
+  line-height: 1.05;
+  margin: 0 0 24px;
+  font-weight: 600;
 }
 
 h2 {
-  margin-top: 40px;
+  font-size: 24px;
+  margin: 48px 0 12px;
+  font-weight: 600;
+}
+
+p {
+  font-size: 22px;
+  margin: 0 0 18px;
+}
+
+.intro {
+  font-size: 28px;
+  max-width: 20em;
+  margin-bottom: 32px;
+}
+
+.principles {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px;
+}
+
+.principles li {
+  font-size: 26px;
+  margin: 0 0 10px;
+}
+
+.loop {
+  font-size: 28px;
+  margin: 28px 0 40px;
 }
