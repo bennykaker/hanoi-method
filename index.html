@@ -1,56 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>The Hanoi Method</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Hanoi</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+<body data-theme="winter">
+  <main class="layout">
+    <div class="site-title">The Hanoi Method</div>
 
-<body>
+    <div class="theme-control">
+      <label for="theme-select">Palette</label>
+      <select id="theme-select">
+        <option value="spring">Springtime</option>
+        <option value="summer">Summer</option>
+        <option value="winter" selected>Winter</option>
+        <option value="fall">Fall</option>
+      </select>
+    </div>
 
-<main>
+    <section class="prompt-block">
+      <h1 id="exercise-title">Exercise</h1>
+      <p id="exercise-prompt">Loading...</p>
+      <div class="prompt-actions">
+        <button id="new-exercise" type="button">New exercise</button>
+      </div>
+    </section>
 
-<h1>The Hanoi Method</h1>
+    <div class="empty"></div>
 
-<ul class="principles">
-<li>Focus on the process.</li>
-<li>Do the work.</li>
-<li>Don't look back.</li>
-</ul>
+    <section class="writing-block">
+      <label for="writing" class="label">Write</label>
 
-<p class="loop">
-Write → Revise → Next.
-</p>
+      <form id="writing-form">
+        <textarea id="writing" name="writing" placeholder="Start writing here..."></textarea>
 
-<section>
+        <div class="actions">
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+    </section>
 
-<h2>What it is</h2>
+    <aside class="review-block">
+      <div id="feedback-window" class="feedback-window">
+        <p><strong>Feedback</strong></p>
+        <p>Feedback will appear here.</p>
+      </div>
+    </aside>
+  </main>
 
-<p>
-The Hanoi Method is a way of practicing writing.
-</p>
+  <script>
+    const form = document.getElementById("writing-form");
+    const writing = document.getElementById("writing");
+    const feedbackWindow = document.getElementById("feedback-window");
+    const themeSelect = document.getElementById("theme-select");
+    const exerciseTitle = document.getElementById("exercise-title");
+    const exercisePrompt = document.getElementById("exercise-prompt");
+    const newExerciseButton = document.getElementById("new-exercise");
 
-<p>
-Write something short. Revise it once. Move on.
-</p>
+    let currentExercise = {
+      title: "Exercise",
+      prompt: ""
+    };
 
-<p>
-The goal is not to preserve the work. The goal is to build the skill.
-</p>
+    const savedTheme = localStorage.getItem("theme") || "winter";
+    document.body.setAttribute("data-theme", savedTheme);
+    themeSelect.value = savedTheme;
 
-</section>
+    themeSelect.addEventListener("change", function () {
+      const theme = themeSelect.value;
+      document.body.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
+    });
 
-<section>
+    async function loadExercise() {
+      const response = await fetch("/exercise");
+      const data = await response.json();
+      currentExercise = data;
+      exerciseTitle.textContent = data.title;
+      exercisePrompt.textContent = data.prompt;
+      feedbackWindow.innerHTML = `
+        <p><strong>Feedback</strong></p>
+        <p>Feedback will appear here.</p>
+      `;
+    }
 
-<h2>Start</h2>
+    newExerciseButton.addEventListener("click", async function () {
+      await loadExercise();
+      writing.value = "";
+      writing.focus();
+    });
 
-<p>
-<a href="exercise.html">Try the first exercise</a>
-</p>
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
 
-</section>
+      const text = writing.value;
 
-</main>
+      feedbackWindow.innerHTML = `
+        <p><strong>Feedback</strong></p>
+        <p>Reviewing...</p>
+      `;
 
+      try {
+        const response = await fetch("/review", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            text,
+            prompt: currentExercise.prompt
+          })
+        });
+
+        const data = await response.json();
+
+        feedbackWindow.innerHTML = `
+          <p><strong>Feedback</strong></p>
+          <p><strong>Word count:</strong> ${data.wordCount}</p>
+          <ul>
+            ${data.notes.map(note => `<li>${note}</li>`).join("")}
+          </ul>
+          <p><strong>Next pass:</strong> ${data.next}</p>
+        `;
+      } catch (error) {
+        feedbackWindow.innerHTML = `
+          <p><strong>Feedback</strong></p>
+          <p>Request failed.</p>
+        `;
+      }
+    });
+
+    loadExercise();
+  </script>
 </body>
 </html>
