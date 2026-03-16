@@ -4,6 +4,7 @@
   --border: #475466;
   --text: #e8e2d8;
   --muted: #b9b1a6;
+  --danger: #e07a7a;
 }
 
 body[data-theme="winter"] {
@@ -12,6 +13,7 @@ body[data-theme="winter"] {
   --border: #475466;
   --text: #e8e2d8;
   --muted: #b9b1a6;
+  --danger: #e07a7a;
 }
 
 body[data-theme="spring"] {
@@ -20,6 +22,7 @@ body[data-theme="spring"] {
   --border: #708b71;
   --text: #edf2e7;
   --muted: #c9d4c3;
+  --danger: #f08e8e;
 }
 
 body[data-theme="summer"] {
@@ -28,6 +31,7 @@ body[data-theme="summer"] {
   --border: #688a92;
   --text: #f2eadf;
   --muted: #d7cbbd;
+  --danger: #ef8b7d;
 }
 
 body[data-theme="fall"] {
@@ -36,6 +40,7 @@ body[data-theme="fall"] {
   --border: #8a6a4e;
   --text: #f0e3d3;
   --muted: #d1b9a0;
+  --danger: #f0936f;
 }
 
 body {
@@ -156,6 +161,19 @@ textarea:focus {
   border-color: var(--text);
 }
 
+.writing-meta {
+  margin-top: 10px;
+}
+
+.word-count {
+  font-size: 16px;
+  color: var(--muted);
+}
+
+.word-count.over-limit {
+  color: var(--danger);
+}
+
 .actions {
   margin-top: 14px;
 }
@@ -173,6 +191,14 @@ button {
 button:hover {
   background: var(--text);
   color: var(--bg);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--muted);
 }
 
 .feedback-window {

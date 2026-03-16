@@ -35,8 +35,12 @@
       <form id="writing-form">
         <textarea id="writing" name="writing" placeholder="Start writing here..."></textarea>
 
+        <div class="writing-meta">
+          <div id="word-count" class="word-count">0 / 120 words</div>
+        </div>
+
         <div class="actions">
-          <button type="submit">Submit</button>
+          <button id="submit-button" type="submit">Submit</button>
         </div>
       </form>
     </section>
@@ -57,11 +61,34 @@
     const exerciseTitle = document.getElementById("exercise-title");
     const exercisePrompt = document.getElementById("exercise-prompt");
     const newExerciseButton = document.getElementById("new-exercise");
+    const wordCountDisplay = document.getElementById("word-count");
+    const submitButton = document.getElementById("submit-button");
+
+    const WORD_LIMIT = 120;
 
     let currentExercise = {
       title: "Exercise",
       prompt: ""
     };
+
+    function countWords(text) {
+      const trimmed = text.trim();
+      if (!trimmed) return 0;
+      return trimmed.split(/\s+/).length;
+    }
+
+    function updateWordCount() {
+      const count = countWords(writing.value);
+      wordCountDisplay.textContent = `${count} / ${WORD_LIMIT} words`;
+
+      if (count > WORD_LIMIT) {
+        wordCountDisplay.classList.add("over-limit");
+        submitButton.disabled = true;
+      } else {
+        wordCountDisplay.classList.remove("over-limit");
+        submitButton.disabled = false;
+      }
+    }
 
     const savedTheme = localStorage.getItem("theme") || "winter";
     document.body.setAttribute("data-theme", savedTheme);
@@ -74,11 +101,27 @@
     });
 
     async function loadExercise() {
-      const response = await fetch("/exercise");
-      const data = await response.json();
-      currentExercise = data;
-      exerciseTitle.textContent = data.title;
-      exercisePrompt.textContent = data.prompt;
+      exerciseTitle.textContent = "Exercise";
+      exercisePrompt.textContent = "Loading...";
+
+      try {
+        const response = await fetch("/exercise");
+
+        if (!response.ok) {
+          throw new Error("exercise request failed");
+        }
+
+        const data = await response.json();
+
+        currentExercise = data;
+        exerciseTitle.textContent = data.title || "Exercise";
+        exercisePrompt.textContent = data.prompt || "No prompt received.";
+      } catch (error) {
+        exerciseTitle.textContent = "Exercise";
+        exercisePrompt.textContent = "Could not load exercise.";
+        console.error(error);
+      }
+
       feedbackWindow.innerHTML = `
         <p><strong>Feedback</strong></p>
         <p>Feedback will appear here.</p>
@@ -88,13 +131,25 @@
     newExerciseButton.addEventListener("click", async function () {
       await loadExercise();
       writing.value = "";
+      updateWordCount();
       writing.focus();
     });
+
+    writing.addEventListener("input", updateWordCount);
 
     form.addEventListener("submit", async function (event) {
       event.preventDefault();
 
       const text = writing.value;
+      const count = countWords(text);
+
+      if (count > WORD_LIMIT) {
+        feedbackWindow.innerHTML = `
+          <p><strong>Feedback</strong></p>
+          <p>Over the word limit.</p>
+        `;
+        return;
+      }
 
       feedbackWindow.innerHTML = `
         <p><strong>Feedback</strong></p>
@@ -128,10 +183,12 @@
           <p><strong>Feedback</strong></p>
           <p>Request failed.</p>
         `;
+        console.error(error);
       }
     });
 
     loadExercise();
+    updateWordCount();
   </script>
 </body>
 </html>
