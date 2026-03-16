@@ -1,5 +1,7 @@
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const OpenAI = require("openai");
+const exercises = require("./exercises");
 
 const app = express();
 const port = 3000;
@@ -7,27 +9,25 @@ const port = 3000;
 app.use(express.json());
 app.use(express.static("."));
 
+const reviewLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    wordCount: 0,
+    notes: [
+      "Rate limit reached.",
+      "Too many reviews requested.",
+      "Wait a moment."
+    ],
+    next: "Try again in a minute."
+  }
+});
+
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
-
-const exercises = [
-  {
-    id: 1,
-    title: "Subtext",
-    prompt: "Write a short scene between two people who want different things. Neither character may say directly what they want. Limit: 120 words."
-  },
-  {
-    id: 2,
-    title: "Concealed motive",
-    prompt: "Write a short scene in which one person needs a favour but pretends they are only making conversation. Limit: 120 words."
-  },
-  {
-    id: 3,
-    title: "Power shift",
-    prompt: "Write a short scene in which the balance of power changes once. Do not explain the change. Limit: 120 words."
-  }
-];
 
 function randomExercise() {
   return exercises[Math.floor(Math.random() * exercises.length)];
@@ -37,7 +37,7 @@ app.get("/exercise", (req, res) => {
   res.json(randomExercise());
 });
 
-app.post("/review", async (req, res) => {
+app.post("/review", reviewLimiter, async (req, res) => {
   const { text, prompt } = req.body;
 
   if (!text || !text.trim()) {
