@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Write</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<main>
+
+<h1>Write</h1>
+
+<p>
+Write the exercise. Revise once. Move on.
+</p>
+
+<textarea id="editor" rows="20" style="width:100%; font-size:18px; line-height:1.6;" placeholder="Start writing..."></textarea>
+
+<p style="margin-top:20px;">
+<button onclick="next()">Next</button>
+</p>
+
+<p class="loop">
+Write → Revise → Next.
+</p>
+
+</main>
+
+<script>
+function next() {
+  if (confirm("Finished? This will clear the page.")) {
+    document.getElementById("editor").value = "";
+  }
+}
+</script>
+
+</body>
+</html>
