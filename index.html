@@ -50,6 +50,10 @@
         <p><strong>Feedback</strong></p>
         <p>Feedback will appear here.</p>
       </div>
+
+      <div class="review-actions">
+        <button id="next-after-review" type="button" hidden>Next exercise</button>
+      </div>
     </aside>
   </main>
 
@@ -61,6 +65,7 @@
     const exerciseTitle = document.getElementById("exercise-title");
     const exercisePrompt = document.getElementById("exercise-prompt");
     const newExerciseButton = document.getElementById("new-exercise");
+    const nextAfterReviewButton = document.getElementById("next-after-review");
     const wordCountDisplay = document.getElementById("word-count");
     const submitButton = document.getElementById("submit-button");
 
@@ -90,15 +95,13 @@
       }
     }
 
-    const savedTheme = localStorage.getItem("theme") || "winter";
-    document.body.setAttribute("data-theme", savedTheme);
-    themeSelect.value = savedTheme;
-
-    themeSelect.addEventListener("change", function () {
-      const theme = themeSelect.value;
-      document.body.setAttribute("data-theme", theme);
-      localStorage.setItem("theme", theme);
-    });
+    function resetFeedback() {
+      feedbackWindow.innerHTML = `
+        <p><strong>Feedback</strong></p>
+        <p>Feedback will appear here.</p>
+      `;
+      nextAfterReviewButton.hidden = true;
+    }
 
     async function loadExercise() {
       exerciseTitle.textContent = "Exercise";
@@ -122,18 +125,28 @@
         console.error(error);
       }
 
-      feedbackWindow.innerHTML = `
-        <p><strong>Feedback</strong></p>
-        <p>Feedback will appear here.</p>
-      `;
+      resetFeedback();
     }
 
-    newExerciseButton.addEventListener("click", async function () {
+    async function nextExerciseFlow() {
       await loadExercise();
       writing.value = "";
       updateWordCount();
       writing.focus();
+    }
+
+    const savedTheme = localStorage.getItem("theme") || "winter";
+    document.body.setAttribute("data-theme", savedTheme);
+    themeSelect.value = savedTheme;
+
+    themeSelect.addEventListener("change", function () {
+      const theme = themeSelect.value;
+      document.body.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
     });
+
+    newExerciseButton.addEventListener("click", nextExerciseFlow);
+    nextAfterReviewButton.addEventListener("click", nextExerciseFlow);
 
     writing.addEventListener("input", updateWordCount);
 
@@ -148,6 +161,7 @@
           <p><strong>Feedback</strong></p>
           <p>Over the word limit.</p>
         `;
+        nextAfterReviewButton.hidden = true;
         return;
       }
 
@@ -155,6 +169,7 @@
         <p><strong>Feedback</strong></p>
         <p>Reviewing...</p>
       `;
+      nextAfterReviewButton.hidden = true;
 
       try {
         const response = await fetch("/review", {
@@ -178,11 +193,14 @@
           </ul>
           <p><strong>Next pass:</strong> ${data.next}</p>
         `;
+
+        nextAfterReviewButton.hidden = false;
       } catch (error) {
         feedbackWindow.innerHTML = `
           <p><strong>Feedback</strong></p>
           <p>Request failed.</p>
         `;
+        nextAfterReviewButton.hidden = true;
         console.error(error);
       }
     });
