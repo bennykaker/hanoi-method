@@ -29,12 +29,39 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-function randomExercise() {
-  return exercises[Math.floor(Math.random() * exercises.length)];
+function randomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function getExerciseByCategory(category) {
+  if (!category || category === "all") {
+    return randomItem(exercises);
+  }
+
+  const filtered = exercises.filter(
+    (exercise) => exercise.category === category
+  );
+
+  if (filtered.length === 0) {
+    return randomItem(exercises);
+  }
+
+  return randomItem(filtered);
 }
 
 app.get("/exercise", (req, res) => {
-  res.json(randomExercise());
+  const category = req.query.category || "all";
+  res.json(getExerciseByCategory(category));
+});
+
+app.get("/categories", (req, res) => {
+  res.json([
+    { value: "all", label: "All" },
+    { value: "dialogue", label: "Dialogue" },
+    { value: "scene", label: "Scene" },
+    { value: "description", label: "Description" },
+    { value: "voice", label: "Voice" }
+  ]);
 });
 
 app.post("/review", reviewLimiter, async (req, res) => {
@@ -58,7 +85,8 @@ app.post("/review", reviewLimiter, async (req, res) => {
       input: [
         {
           role: "system",
-          content: "You review short writing exercises. Be brief, concrete, and unsentimental. Return valid JSON only. No markdown. No preamble."
+          content:
+            "You review short writing exercises. Be brief, concrete, and unsentimental. Return valid JSON only. No markdown. No preamble."
         },
         {
           role: "user",
