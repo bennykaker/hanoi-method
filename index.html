@@ -46,18 +46,14 @@
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
-    html,
-    body {
+    html, body {
       margin: 0;
       padding: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     body {
@@ -65,16 +61,8 @@
       line-height: 1.5;
     }
 
-    a,
-    button,
-    input,
-    textarea {
-      font: inherit;
-    }
-
-    button {
-      -webkit-tap-highlight-color: transparent;
-    }
+    a, button, input, textarea { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
 
     .app {
       max-width: var(--max-width);
@@ -124,10 +112,7 @@
       min-height: 36px;
     }
 
-    .theme-option:hover {
-      color: var(--text);
-    }
-
+    .theme-option:hover { color: var(--text); }
     .theme-option.active {
       background: var(--accent);
       color: var(--bg);
@@ -198,13 +183,8 @@
       line-height: 1.7;
     }
 
-    .editor::placeholder {
-      color: #9a9389;
-    }
-
-    html[data-theme="dark"] .editor::placeholder {
-      color: #8d867b;
-    }
+    .editor::placeholder { color: #9a9389; }
+    html[data-theme="dark"] .editor::placeholder { color: #8d867b; }
 
     .editor-meta {
       display: flex;
@@ -240,14 +220,8 @@
       transition: background 0.18s ease, transform 0.08s ease;
     }
 
-    .primary-btn:hover {
-      background: var(--accent-hover);
-    }
-
-    .primary-btn:active {
-      transform: translateY(1px);
-    }
-
+    .primary-btn:hover { background: var(--accent-hover); }
+    .primary-btn:active { transform: translateY(1px); }
     .primary-btn:disabled {
       opacity: 0.72;
       cursor: not-allowed;
@@ -300,26 +274,27 @@
     }
 
     .status-card,
-    .feedback-card {
+    .feedback-card,
+    .error-card {
       padding: 18px 20px;
       display: none;
     }
 
     .status-card.active,
-    .feedback-card.active {
+    .feedback-card.active,
+    .error-card.active {
       display: block;
     }
 
     .status-title,
-    .feedback-title {
+    .feedback-title,
+    .error-title {
       margin: 0 0 10px;
       font-size: 1.05rem;
       font-weight: 700;
     }
 
-    .muted {
-      color: var(--muted);
-    }
+    .muted { color: var(--muted); }
 
     .wait-list {
       margin: 10px 0 0;
@@ -327,7 +302,8 @@
       color: var(--muted);
     }
 
-    .feedback-body {
+    .feedback-body,
+    .error-body {
       margin: 0;
       white-space: pre-wrap;
     }
@@ -347,18 +323,14 @@
       min-height: 44px;
     }
 
-    .danger-btn {
-      color: var(--danger);
-    }
+    .danger-btn { color: var(--danger); }
 
     .tooltip-wrap {
       position: relative;
       display: inline-flex;
     }
 
-    .tooltip-wrap > button {
-      height: 100%;
-    }
+    .tooltip-wrap > button { height: 100%; }
 
     .tooltip {
       position: absolute;
@@ -376,7 +348,7 @@
       pointer-events: none;
       transition: opacity 0.14s ease;
       z-index: 10;
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.18);
     }
 
     .tooltip-wrap:hover .tooltip,
@@ -579,12 +551,17 @@
       </section>
 
       <article id="statusCard" class="panel status-card" aria-live="polite">
-        <h2 class="status-title">Reviewing your piece… (~20s)</h2>
+        <h2 class="status-title">Reviewing your piece…</h2>
         <div class="muted">While you wait:</div>
         <ul class="wait-list">
           <li>Take a breath and let the draft be ugly.</li>
           <li>The goal is motion, not perfection.</li>
         </ul>
+      </article>
+
+      <article id="errorCard" class="panel error-card">
+        <h2 class="error-title">Couldn’t get feedback</h2>
+        <p class="error-body" id="errorBody"></p>
       </article>
 
       <article id="feedbackCard" class="panel feedback-card">
@@ -668,21 +645,15 @@
     const reviewerMeta = {
       pudding: {
         button: "Get feedback",
-        heading: "Big Pudding says (supportive):",
-        feedback:
-          "You’ve got the core thing already: there is tension on the page, and the scene knows what it wants to do.\n\nWhat’s working:\n- The emotional direction is clear.\n- There’s enough specificity to feel like a real moment.\n- You’re not overexplaining every beat.\n\nWhat to improve next:\n- Push the concrete details a little harder.\n- Let one sentence land more cleanly instead of qualifying it.\n- Trim any line that explains what the reader already understands."
+        heading: "Big Pudding says (supportive):"
       },
       ogg: {
         button: "Get feedback (Ogg)",
-        heading: "Professor Ogg says (balanced):",
-        feedback:
-          "This is competent and readable, but it is still pulling punches.\n\nStrengths:\n- The scene has shape.\n- The conflict is legible.\n- The prose is mostly controlled.\n\nWeaknesses:\n- Not enough pressure in the subtext.\n- Several sentences report emotion instead of dramatizing it.\n- The strongest image arrives too late.\n\nRevision target:\nOpen later, cut softer throat-clearing, and force the characters to reveal themselves through action rather than explanation."
+        heading: "Professor Ogg says (balanced):"
       },
       steve: {
         button: "Get feedback (Steve)",
-        heading: "Steve says (direct):",
-        feedback:
-          "The piece is not dead, but it is still too safe.\n\nProblems:\n- You are explaining where you should be implying.\n- The language is serviceable, not sharp.\n- The scene has conflict, but not enough consequence.\n\nDo this:\n1. Cut 15 percent.\n2. Replace the vaguest 3 sentences with something concrete.\n3. Make one line hurt.\n\nRight now it reads like a draft that knows what it means but hasn’t fully committed to saying it."
+        heading: "Steve says (direct):"
       }
     };
 
@@ -694,6 +665,8 @@
     const submitBtn = document.getElementById("submitBtn");
     const statusCard = document.getElementById("statusCard");
     const feedbackCard = document.getElementById("feedbackCard");
+    const errorCard = document.getElementById("errorCard");
+    const errorBody = document.getElementById("errorBody");
     const feedbackHeading = document.getElementById("feedbackHeading");
     const feedbackBody = document.getElementById("feedbackBody");
     const reviewerModal = document.getElementById("reviewerModal");
@@ -710,8 +683,9 @@
     const confirmOkBtn = document.getElementById("confirmOkBtn");
 
     let currentReviewer = "pudding";
-    let reviewTimer = null;
     let confirmResolver = null;
+    let lastSubmittedText = "";
+    let lastSubmittedPrompt = "";
 
     function countWords(text) {
       const trimmed = text.trim();
@@ -811,6 +785,7 @@
       editor.value = "";
       promptText.textContent = getRandomPrompt();
       feedbackCard.classList.remove("active");
+      errorCard.classList.remove("active");
       statusCard.classList.remove("active");
       updateWordCount();
       editor.focus();
@@ -834,15 +809,53 @@
       editor.focus();
     }
 
-    function renderFeedback() {
-      const meta = reviewerMeta[currentReviewer];
-      feedbackHeading.textContent = meta.heading;
-      feedbackBody.textContent = meta.feedback;
-      feedbackCard.classList.add("active");
-      updateReviewerButtons();
+    function showError(message) {
+      errorBody.textContent = message;
+      errorCard.classList.add("active");
+      feedbackCard.classList.remove("active");
     }
 
-    function beginReview() {
+    async function fetchReview(text, prompt, reviewer) {
+      const response = await fetch("/review", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text, prompt, reviewer })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Could not get feedback.");
+      }
+
+      return data.feedback;
+    }
+
+    async function runReview(text, prompt, reviewer) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Reviewing your piece…";
+      statusCard.classList.add("active");
+      feedbackCard.classList.remove("active");
+      errorCard.classList.remove("active");
+
+      try {
+        const feedback = await fetchReview(text, prompt, reviewer);
+        feedbackHeading.textContent = reviewerMeta[reviewer].heading;
+        feedbackBody.textContent = feedback;
+        feedbackCard.classList.add("active");
+        updateReviewerButtons();
+      } catch (err) {
+        showError(err.message || "Something went wrong.");
+      } finally {
+        statusCard.classList.remove("active");
+        submitBtn.disabled = false;
+        updateSubmitLabel();
+      }
+    }
+
+    async function beginReview() {
       const text = editor.value.trim();
 
       if (!text) {
@@ -851,22 +864,15 @@
         return;
       }
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Reviewing your piece… (~20s)";
-      statusCard.classList.add("active");
-      feedbackCard.classList.remove("active");
+      lastSubmittedText = text;
+      lastSubmittedPrompt = promptText.textContent.trim();
 
-      clearTimeout(reviewTimer);
-      reviewTimer = setTimeout(() => {
-        statusCard.classList.remove("active");
-        renderFeedback();
-        submitBtn.disabled = false;
-        updateSubmitLabel();
-      }, 1400);
+      await runReview(lastSubmittedText, lastSubmittedPrompt, currentReviewer);
     }
 
     function backToDraft() {
       feedbackCard.classList.remove("active");
+      errorCard.classList.remove("active");
       statusCard.classList.remove("active");
       window.scrollTo({ top: 0, behavior: "smooth" });
       editor.focus();
@@ -895,6 +901,26 @@
       applyTheme(prefersDark ? "dark" : "light");
     }
 
+    async function switchReviewer(reviewer) {
+      if (reviewer === "steve" && currentReviewer !== "steve") {
+        const sure = await maybeConfirmDestructive({
+          title: "You sure?",
+          message: "Steve is tough.",
+          okText: "Let Steve review",
+          cancelText: "Cancel"
+        });
+        if (!sure) return;
+      }
+
+      currentReviewer = reviewer;
+      updateSubmitLabel();
+      updateReviewerButtons();
+
+      if (lastSubmittedText && lastSubmittedPrompt && feedbackCard.classList.contains("active")) {
+        await runReview(lastSubmittedText, lastSubmittedPrompt, currentReviewer);
+      }
+    }
+
     themeOptions.forEach((button) => {
       button.addEventListener("click", () => {
         applyTheme(button.dataset.themeOption);
@@ -911,21 +937,8 @@
     document.getElementById("saveReviewerBtn").addEventListener("click", async () => {
       const selected = document.querySelector('input[name="reviewer"]:checked');
       if (!selected) return;
-
-      if (selected.value === "steve" && currentReviewer !== "steve") {
-        const sure = await maybeConfirmDestructive({
-          title: "You sure?",
-          message: "Steve is tough.",
-          okText: "Let Steve review",
-          cancelText: "Cancel"
-        });
-        if (!sure) return;
-      }
-
-      currentReviewer = selected.value;
-      updateSubmitLabel();
       closeReviewerModal();
-      updateReviewerButtons();
+      await switchReviewer(selected.value);
     });
 
     document.getElementById("reviewerList").addEventListener("change", (event) => {
@@ -951,31 +964,16 @@
 
     document.getElementById("tryAnotherBtn").addEventListener("click", setNewPrompt);
 
-    document.getElementById("puddingBtn").addEventListener("click", () => {
-      currentReviewer = "pudding";
-      updateSubmitLabel();
-      renderFeedback();
+    document.getElementById("puddingBtn").addEventListener("click", async () => {
+      await switchReviewer("pudding");
     });
 
-    document.getElementById("oggBtn").addEventListener("click", () => {
-      currentReviewer = "ogg";
-      updateSubmitLabel();
-      renderFeedback();
+    document.getElementById("oggBtn").addEventListener("click", async () => {
+      await switchReviewer("ogg");
     });
 
     document.getElementById("steveBtn").addEventListener("click", async () => {
-      const sure = await maybeConfirmDestructive({
-        title: "You sure?",
-        message: "Steve is tough.",
-        okText: "Let Steve review",
-        cancelText: "Cancel"
-      });
-
-      if (!sure) return;
-
-      currentReviewer = "steve";
-      updateSubmitLabel();
-      renderFeedback();
+      await switchReviewer("steve");
     });
 
     editor.addEventListener("input", updateWordCount);
