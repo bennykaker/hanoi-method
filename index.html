@@ -1,80 +1,680 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Hanoi</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hanoi Method Writing Exercises</title>
+  <style>
+    :root {
+      --bg: #f5f3ee;
+      --panel: #ffffff;
+      --panel-soft: #f0ece4;
+      --text: #1f1f1c;
+      --muted: #6f6a61;
+      --border: #ddd6c8;
+      --accent: #1f1f1c;
+      --accent-hover: #353530;
+      --danger: #7a2e2e;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      --radius: 16px;
+      --max-width: 980px;
+    }
+
+    html[data-theme="dark"] {
+      --bg: #161616;
+      --panel: #202020;
+      --panel-soft: #262626;
+      --text: #f1efe9;
+      --muted: #b2ab9f;
+      --border: #3b3b3b;
+      --accent: #f1efe9;
+      --accent-hover: #ddd8ce;
+      --danger: #ff9f9f;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    a,
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 24px 20px 48px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .brand {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 9px 14px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .theme-toggle:hover {
+      border-color: #bdb4a3;
+      background: #faf8f3;
+    }
+
+    html[data-theme="dark"] .theme-toggle:hover {
+      background: #2a2a2a;
+      border-color: #575757;
+    }
+
+    .stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .prompt-card {
+      padding: 18px 20px 16px;
+      background: var(--panel-soft);
+      box-shadow: none;
+    }
+
+    .prompt-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .eyebrow {
+      display: block;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .prompt-text {
+      margin: 0;
+      font-size: 1.08rem;
+      font-weight: 600;
+      max-width: 60ch;
+    }
+
+    .editor-card {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      height: min(50vh, 500px);
+      max-height: min(50vh, 500px);
+    }
+
+    .editor {
+      width: 100%;
+      flex: 1;
+      min-height: 200px;
+      max-height: 100%;
+      resize: none;
+      overflow-y: auto;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 1.08rem;
+      line-height: 1.7;
+      spellcheck: false;
+    }
+
+    .editor::placeholder {
+      color: #9a9389;
+    }
+
+    html[data-theme="dark"] .editor::placeholder {
+      color: #8d867b;
+    }
+
+    .editor-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      color: var(--muted);
+      font-size: 0.94rem;
+      margin-top: 10px;
+      flex-shrink: 0;
+    }
+
+    html[data-theme="dark"] .editor-meta {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    .primary-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 16px 20px;
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.18s ease, transform 0.08s ease;
+    }
+
+    .primary-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .primary-btn:active {
+      transform: translateY(1px);
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.72;
+      cursor: not-allowed;
+    }
+
+    .secondary-btn,
+    .ghost-btn,
+    .danger-btn,
+    .texty-btn {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 11px 14px;
+      min-height: 44px;
+      line-height: 1.2;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .secondary-btn:hover,
+    .ghost-btn:hover,
+    .danger-btn:hover,
+    .texty-btn:hover {
+      border-color: #bdb4a3;
+      background: #faf8f3;
+    }
+
+    html[data-theme="dark"] .secondary-btn:hover,
+    html[data-theme="dark"] .ghost-btn:hover,
+    html[data-theme="dark"] .danger-btn:hover,
+    html[data-theme="dark"] .texty-btn:hover {
+      background: #2a2a2a;
+      border-color: #575757;
+    }
+
+    .secondary-btn {
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .secondary-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .status-card,
+    .feedback-card {
+      padding: 18px 20px;
+      display: none;
+    }
+
+    .status-card.active,
+    .feedback-card.active {
+      display: block;
+    }
+
+    .status-title,
+    .feedback-title {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .wait-list {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .feedback-body {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+
+    .feedback-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+      align-items: stretch;
+    }
+
+    .feedback-actions > .primary-btn,
+    .feedback-actions > .ghost-btn,
+    .feedback-actions > .danger-btn,
+    .feedback-actions > .tooltip-wrap {
+      min-height: 44px;
+    }
+
+    .danger-btn {
+      color: var(--danger);
+    }
+
+    .tooltip-wrap {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .tooltip-wrap > button {
+      height: 100%;
+    }
+
+    .tooltip {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 8px);
+      transform: translateX(-50%);
+      background: #1f1f1c;
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      line-height: 1.35;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.14s ease;
+      z-index: 10;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+    }
+
+    .tooltip-wrap:hover .tooltip,
+    .tooltip-wrap:focus-within .tooltip {
+      opacity: 1;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 20, 18, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      width: min(560px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
+      padding: 22px;
+    }
+
+    .modal h2 {
+      margin: 0 0 14px;
+      font-size: 1.2rem;
+    }
+
+    .reviewer-list {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .reviewer-option {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .reviewer-option:hover {
+      border-color: #bdb4a3;
+      background: #faf8f3;
+    }
+
+    html[data-theme="dark"] .reviewer-option:hover {
+      background: #2a2a2a;
+      border-color: #575757;
+    }
+
+    .reviewer-option.selected {
+      border-color: var(--text);
+      background: color-mix(in srgb, var(--panel-soft) 70%, var(--panel));
+    }
+
+    .reviewer-option input {
+      margin-right: 10px;
+    }
+
+    .reviewer-name {
+      font-weight: 700;
+    }
+
+    .reviewer-desc {
+      margin: 4px 0 0 28px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        padding: 18px 14px 32px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-actions {
+        justify-content: flex-start;
+      }
+
+      .prompt-head {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .editor-card {
+        height: min(46vh, 420px);
+        max-height: min(46vh, 420px);
+      }
+
+      .editor {
+        font-size: 1rem;
+      }
+
+      .editor-meta {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .feedback-actions {
+        flex-direction: column;
+      }
+
+      .feedback-actions > .primary-btn,
+      .feedback-actions > .ghost-btn,
+      .feedback-actions > .danger-btn,
+      .feedback-actions > .tooltip-wrap {
+        width: 100%;
+      }
+
+      .tooltip-wrap > button {
+        width: 100%;
+      }
+
+      .ghost-btn,
+      .danger-btn,
+      .texty-btn,
+      .secondary-btn {
+        width: 100%;
+      }
+
+      .tooltip {
+        white-space: normal;
+        width: 220px;
+      }
+    }
+  </style>
 </head>
-<body data-theme="winter">
-  <main class="layout">
-    <div class="site-title">The Hanoi Method</div>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">Hanoi Method Writing Exercises</div>
 
-    <div class="theme-control">
-      <label for="theme-select">Palette</label>
-      <select id="theme-select">
-        <option value="spring">Springtime</option>
-        <option value="summer">Summer</option>
-        <option value="winter" selected>Winter</option>
-        <option value="fall">Fall</option>
-      </select>
-    </div>
-
-    <section class="prompt-block">
-      <h1 id="exercise-title">Exercise</h1>
-      <p id="exercise-prompt">Loading...</p>
-      <div class="prompt-actions">
-        <button id="new-exercise" type="button">New exercise</button>
+      <div class="header-actions">
+        <button class="theme-toggle" id="themeToggle" type="button">Dark mode</button>
       </div>
-    </section>
+    </header>
 
-    <div class="empty"></div>
+    <section class="stack">
+      <article class="panel prompt-card">
+        <div class="prompt-head">
+          <div>
+            <span class="eyebrow">Prompt</span>
+            <p class="prompt-text" id="promptText">
+              Write a scene where a character lies convincingly — but the reader can tell they’re lying.
+            </p>
+          </div>
 
-    <section class="writing-block">
-      <label for="writing" class="label">Write</label>
-
-      <form id="writing-form">
-        <textarea id="writing" name="writing" placeholder="Start writing here..."></textarea>
-
-        <div class="writing-meta">
-          <div id="word-count" class="word-count">0 / 120 words</div>
+          <button class="secondary-btn" id="newPromptBtn" type="button">New prompt</button>
         </div>
+      </article>
 
-        <div class="actions">
-          <button id="submit-button" type="submit">Submit</button>
+      <article class="panel editor-card">
+        <textarea
+          id="editor"
+          class="editor"
+          placeholder="Start writing… (250–500 words is a good target)"
+          autofocus
+          spellcheck="false"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="sentences"
+        ></textarea>
+
+        <div class="editor-meta">
+          <div id="wordCount">0 words</div>
+          <div>Target: 250–500 words</div>
         </div>
-      </form>
+      </article>
+
+      <section class="controls">
+        <button id="submitBtn" class="primary-btn" type="button">Get feedback</button>
+
+        <div class="secondary-row">
+          <button class="texty-btn" id="changeReviewerBtn" type="button">Change reviewer</button>
+          <button class="texty-btn" id="clearBtn" type="button">Clear</button>
+        </div>
+      </section>
+
+      <article id="statusCard" class="panel status-card" aria-live="polite">
+        <h2 class="status-title">Reviewing your piece… (~20s)</h2>
+        <div class="muted">While you wait:</div>
+        <ul class="wait-list">
+          <li>Take a breath and let the draft be ugly.</li>
+          <li>The goal is motion, not perfection.</li>
+        </ul>
+      </article>
+
+      <article id="feedbackCard" class="panel feedback-card">
+        <h2 class="feedback-title" id="feedbackHeading">Big Pudding says (supportive):</h2>
+        <p class="feedback-body" id="feedbackBody"></p>
+
+        <div class="feedback-actions">
+          <button class="primary-btn" id="backToDraftBtn" style="width:auto;" type="button">Back to draft</button>
+          <button class="ghost-btn" id="tryAnotherBtn" type="button">Try another prompt</button>
+
+          <div class="tooltip-wrap">
+            <button class="ghost-btn" id="oggBtn" type="button">See what Ogg thinks</button>
+            <div class="tooltip">Balanced. Clear strengths and clear fixes.</div>
+          </div>
+
+          <div class="tooltip-wrap">
+            <button class="danger-btn" id="steveBtn" type="button">Let Steve review</button>
+            <div class="tooltip">Direct. No fluff. Deadline mode.</div>
+          </div>
+        </div>
+      </article>
     </section>
-
-    <aside class="review-block">
-      <div id="feedback-window" class="feedback-window">
-        <p><strong>Feedback</strong></p>
-        <p>Feedback will appear here.</p>
-      </div>
-
-      <div class="review-actions">
-        <button id="next-after-review" type="button" hidden>Next exercise</button>
-      </div>
-    </aside>
   </main>
 
+  <div class="modal-backdrop" id="reviewerModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reviewerModalTitle">
+      <h2 id="reviewerModalTitle">Choose reviewer</h2>
+
+      <div class="reviewer-list" id="reviewerList">
+        <label class="reviewer-option selected">
+          <input type="radio" name="reviewer" value="pudding" checked />
+          <span class="reviewer-name">Big Pudding</span>
+          <p class="reviewer-desc">Supportive. Focuses on what’s already working.</p>
+        </label>
+
+        <label class="reviewer-option">
+          <input type="radio" name="reviewer" value="ogg" />
+          <span class="reviewer-name">Professor Ogg</span>
+          <p class="reviewer-desc">Balanced. Clear strengths and clear fixes.</p>
+        </label>
+
+        <label class="reviewer-option">
+          <input type="radio" name="reviewer" value="steve" />
+          <span class="reviewer-name">Steve</span>
+          <p class="reviewer-desc">Direct. No fluff. Deadline mode.</p>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button class="ghost-btn" id="cancelReviewerBtn" type="button">Cancel</button>
+        <button class="primary-btn" id="saveReviewerBtn" style="width:auto;" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="confirmModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <h2 id="confirmTitle">Are you sure?</h2>
+      <p id="confirmMessage" class="muted" style="margin: 0 0 18px;"></p>
+
+      <div class="modal-actions">
+        <button class="ghost-btn" id="confirmCancelBtn" type="button">Cancel</button>
+        <button class="primary-btn" id="confirmOkBtn" style="width:auto;" type="button">OK</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const form = document.getElementById("writing-form");
-    const writing = document.getElementById("writing");
-    const feedbackWindow = document.getElementById("feedback-window");
-    const themeSelect = document.getElementById("theme-select");
-    const exerciseTitle = document.getElementById("exercise-title");
-    const exercisePrompt = document.getElementById("exercise-prompt");
-    const newExerciseButton = document.getElementById("new-exercise");
-    const nextAfterReviewButton = document.getElementById("next-after-review");
-    const wordCountDisplay = document.getElementById("word-count");
-    const submitButton = document.getElementById("submit-button");
+    const prompts = [
+      "Write a scene where a character lies convincingly — but the reader can tell they’re lying.",
+      "Write a moment where someone wants to apologize but cannot quite do it.",
+      "Write a scene where two people want different things but are trying to stay polite.",
+      "Write a paragraph that turns an ordinary room into a place charged with tension."
+    ];
 
-    const WORD_LIMIT = 120;
-
-    let currentExercise = {
-      title: "Exercise",
-      prompt: ""
+    const reviewerMeta = {
+      pudding: {
+        button: "Get feedback",
+        heading: "Big Pudding says (supportive):",
+        feedback:
+          "You’ve got the core thing already: there is tension on the page, and the scene knows what it wants to do.\n\nWhat’s working:\n- The emotional direction is clear.\n- There’s enough specificity to feel like a real moment.\n- You’re not overexplaining every beat.\n\nWhat to improve next:\n- Push the concrete details a little harder.\n- Let one sentence land more cleanly instead of qualifying it.\n- Trim any line that explains what the reader already understands."
+      },
+      ogg: {
+        button: "Get feedback (Ogg)",
+        heading: "Professor Ogg says (balanced):",
+        feedback:
+          "This is competent and readable, but it is still pulling punches.\n\nStrengths:\n- The scene has shape.\n- The conflict is legible.\n- The prose is mostly controlled.\n\nWeaknesses:\n- Not enough pressure in the subtext.\n- Several sentences report emotion instead of dramatizing it.\n- The strongest image arrives too late.\n\nRevision target:\nOpen later, cut softer throat-clearing, and force the characters to reveal themselves through action rather than explanation."
+      },
+      steve: {
+        button: "Get feedback (Steve)",
+        heading: "Steve says (direct):",
+        feedback:
+          "The piece is not dead, but it is still too safe.\n\nProblems:\n- You are explaining where you should be implying.\n- The language is serviceable, not sharp.\n- The scene has conflict, but not enough consequence.\n\nDo this:\n1. Cut 15 percent.\n2. Replace the vaguest 3 sentences with something concrete.\n3. Make one line hurt.\n\nRight now it reads like a draft that knows what it means but hasn’t fully committed to saying it."
+      }
     };
+
+    const promptText = document.getElementById("promptText");
+    const editor = document.getElementById("editor");
+    const wordCount = document.getElementById("wordCount");
+    const submitBtn = document.getElementById("submitBtn");
+    const statusCard = document.getElementById("statusCard");
+    const feedbackCard = document.getElementById("feedbackCard");
+    const feedbackHeading = document.getElementById("feedbackHeading");
+    const feedbackBody = document.getElementById("feedbackBody");
+    const reviewerModal = document.getElementById("reviewerModal");
+    const themeToggle = document.getElementById("themeToggle");
+
+    const confirmModal = document.getElementById("confirmModal");
+    const confirmTitle = document.getElementById("confirmTitle");
+    const confirmMessage = document.getElementById("confirmMessage");
+    const confirmCancelBtn = document.getElementById("confirmCancelBtn");
+    const confirmOkBtn = document.getElementById("confirmOkBtn");
+
+    let currentReviewer = "pudding";
+    let reviewTimer = null;
+    let confirmResolver = null;
 
     function countWords(text) {
       const trimmed = text.trim();
@@ -83,129 +683,247 @@
     }
 
     function updateWordCount() {
-      const count = countWords(writing.value);
-      wordCountDisplay.textContent = `${count} / ${WORD_LIMIT} words`;
+      const count = countWords(editor.value);
+      wordCount.textContent = `${count} ${count === 1 ? "word" : "words"}`;
+    }
 
-      if (count > WORD_LIMIT) {
-        wordCountDisplay.classList.add("over-limit");
-        submitButton.disabled = true;
-      } else {
-        wordCountDisplay.classList.remove("over-limit");
-        submitButton.disabled = false;
+    function updateSubmitLabel() {
+      submitBtn.textContent = reviewerMeta[currentReviewer].button;
+    }
+
+    function setReviewerVisualSelection(value) {
+      document.querySelectorAll(".reviewer-option").forEach((option) => {
+        const input = option.querySelector("input");
+        option.classList.toggle("selected", input.value === value);
+        input.checked = input.value === value;
+      });
+    }
+
+    function openReviewerModal() {
+      setReviewerVisualSelection(currentReviewer);
+      reviewerModal.classList.add("active");
+      reviewerModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeReviewerModal() {
+      reviewerModal.classList.remove("active");
+      reviewerModal.setAttribute("aria-hidden", "true");
+    }
+
+    function openConfirmModal({
+      title = "Are you sure?",
+      message = "",
+      okText = "OK",
+      cancelText = "Cancel"
+    }) {
+      confirmTitle.textContent = title;
+      confirmMessage.textContent = message;
+      confirmOkBtn.textContent = okText;
+      confirmCancelBtn.textContent = cancelText;
+
+      confirmModal.classList.add("active");
+      confirmModal.setAttribute("aria-hidden", "false");
+
+      return new Promise((resolve) => {
+        confirmResolver = resolve;
+      });
+    }
+
+    function closeConfirmModal(result) {
+      confirmModal.classList.remove("active");
+      confirmModal.setAttribute("aria-hidden", "true");
+
+      if (confirmResolver) {
+        confirmResolver(result);
+        confirmResolver = null;
       }
     }
 
-    function resetFeedback() {
-      feedbackWindow.innerHTML = `
-        <p><strong>Feedback</strong></p>
-        <p>Feedback will appear here.</p>
-      `;
-      nextAfterReviewButton.hidden = true;
+    async function maybeConfirmDestructive({
+      title = "Are you sure?",
+      message = "",
+      okText = "OK",
+      cancelText = "Cancel"
+    }) {
+      return await openConfirmModal({ title, message, okText, cancelText });
     }
 
-    async function loadExercise() {
-      exerciseTitle.textContent = "Exercise";
-      exercisePrompt.textContent = "Loading...";
+    function getRandomPrompt() {
+      const current = promptText.textContent.trim();
+      const candidates = prompts.filter((p) => p !== current);
+      return candidates[Math.floor(Math.random() * candidates.length)] || prompts[0];
+    }
 
-      try {
-        const response = await fetch("/exercise");
-
-        if (!response.ok) {
-          throw new Error("exercise request failed");
-        }
-
-        const data = await response.json();
-
-        currentExercise = data;
-        exerciseTitle.textContent = data.title || "Exercise";
-        exercisePrompt.textContent = data.prompt || "No prompt received.";
-      } catch (error) {
-        exerciseTitle.textContent = "Exercise";
-        exercisePrompt.textContent = "Could not load exercise.";
-        console.error(error);
+    async function setNewPrompt() {
+      if (editor.value.trim()) {
+        const ok = await maybeConfirmDestructive({
+          title: "Start a new prompt?",
+          message: "This will clear your current draft and load a new prompt.",
+          okText: "New prompt",
+          cancelText: "Cancel"
+        });
+        if (!ok) return;
       }
 
-      resetFeedback();
-    }
-
-    async function nextExerciseFlow() {
-      await loadExercise();
-      writing.value = "";
+      editor.value = "";
+      promptText.textContent = getRandomPrompt();
+      feedbackCard.classList.remove("active");
+      statusCard.classList.remove("active");
       updateWordCount();
-      writing.focus();
+      editor.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    const savedTheme = localStorage.getItem("theme") || "winter";
-    document.body.setAttribute("data-theme", savedTheme);
-    themeSelect.value = savedTheme;
+    async function clearDraft() {
+      if (!editor.value.trim()) return;
 
-    themeSelect.addEventListener("change", function () {
-      const theme = themeSelect.value;
-      document.body.setAttribute("data-theme", theme);
-      localStorage.setItem("theme", theme);
-    });
+      const ok = await maybeConfirmDestructive({
+        title: "Clear draft?",
+        message: "This will remove everything in the writing box.",
+        okText: "Clear it",
+        cancelText: "Cancel"
+      });
 
-    newExerciseButton.addEventListener("click", nextExerciseFlow);
-    nextAfterReviewButton.addEventListener("click", nextExerciseFlow);
+      if (!ok) return;
 
-    writing.addEventListener("input", updateWordCount);
+      editor.value = "";
+      updateWordCount();
+      editor.focus();
+    }
 
-    form.addEventListener("submit", async function (event) {
-      event.preventDefault();
+    function renderFeedback() {
+      const meta = reviewerMeta[currentReviewer];
+      feedbackHeading.textContent = meta.heading;
+      feedbackBody.textContent = meta.feedback;
+      feedbackCard.classList.add("active");
+    }
 
-      const text = writing.value;
-      const count = countWords(text);
+    function beginReview() {
+      const text = editor.value.trim();
 
-      if (count > WORD_LIMIT) {
-        feedbackWindow.innerHTML = `
-          <p><strong>Feedback</strong></p>
-          <p>Over the word limit.</p>
-        `;
-        nextAfterReviewButton.hidden = true;
+      if (!text) {
+        alert("Put some words in the box first.");
+        editor.focus();
         return;
       }
 
-      feedbackWindow.innerHTML = `
-        <p><strong>Feedback</strong></p>
-        <p>Reviewing...</p>
-      `;
-      nextAfterReviewButton.hidden = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Reviewing your piece… (~20s)";
+      statusCard.classList.add("active");
+      feedbackCard.classList.remove("active");
 
-      try {
-        const response = await fetch("/review", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            text,
-            prompt: currentExercise.prompt
-          })
+      clearTimeout(reviewTimer);
+      reviewTimer = setTimeout(() => {
+        statusCard.classList.remove("active");
+        renderFeedback();
+        submitBtn.disabled = false;
+        updateSubmitLabel();
+      }, 1400);
+    }
+
+    function backToDraft() {
+      feedbackCard.classList.remove("active");
+      statusCard.classList.remove("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      editor.focus();
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("hm-theme", theme);
+      themeToggle.textContent = theme === "dark" ? "Light mode" : "Dark mode";
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem("hm-theme");
+      if (savedTheme === "dark" || savedTheme === "light") {
+        applyTheme(savedTheme);
+        return;
+      }
+
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(prefersDark ? "dark" : "light");
+    }
+
+    themeToggle.addEventListener("click", () => {
+      const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+      applyTheme(currentTheme === "dark" ? "light" : "dark");
+    });
+
+    document.getElementById("newPromptBtn").addEventListener("click", setNewPrompt);
+    document.getElementById("clearBtn").addEventListener("click", clearDraft);
+    document.getElementById("submitBtn").addEventListener("click", beginReview);
+    document.getElementById("changeReviewerBtn").addEventListener("click", openReviewerModal);
+    document.getElementById("cancelReviewerBtn").addEventListener("click", closeReviewerModal);
+    document.getElementById("backToDraftBtn").addEventListener("click", backToDraft);
+
+    document.getElementById("saveReviewerBtn").addEventListener("click", async () => {
+      const selected = document.querySelector('input[name="reviewer"]:checked');
+      if (!selected) return;
+
+      if (selected.value === "steve" && currentReviewer !== "steve") {
+        const sure = await maybeConfirmDestructive({
+          title: "You sure?",
+          message: "Steve is tough.",
+          okText: "Let Steve review",
+          cancelText: "Cancel"
         });
+        if (!sure) return;
+      }
 
-        const data = await response.json();
+      currentReviewer = selected.value;
+      updateSubmitLabel();
+      closeReviewerModal();
+    });
 
-        feedbackWindow.innerHTML = `
-          <p><strong>Feedback</strong></p>
-          <p><strong>Word count:</strong> ${data.wordCount}</p>
-          <ul>
-            ${data.notes.map(note => `<li>${note}</li>`).join("")}
-          </ul>
-          <p><strong>Next pass:</strong> ${data.next}</p>
-        `;
-
-        nextAfterReviewButton.hidden = false;
-      } catch (error) {
-        feedbackWindow.innerHTML = `
-          <p><strong>Feedback</strong></p>
-          <p>Request failed.</p>
-        `;
-        nextAfterReviewButton.hidden = true;
-        console.error(error);
+    document.getElementById("reviewerList").addEventListener("change", (event) => {
+      if (event.target.name === "reviewer") {
+        setReviewerVisualSelection(event.target.value);
       }
     });
 
-    loadExercise();
+    reviewerModal.addEventListener("click", (event) => {
+      if (event.target === reviewerModal) {
+        closeReviewerModal();
+      }
+    });
+
+    confirmCancelBtn.addEventListener("click", () => closeConfirmModal(false));
+    confirmOkBtn.addEventListener("click", () => closeConfirmModal(true));
+
+    confirmModal.addEventListener("click", (event) => {
+      if (event.target === confirmModal) {
+        closeConfirmModal(false);
+      }
+    });
+
+    document.getElementById("tryAnotherBtn").addEventListener("click", setNewPrompt);
+
+    document.getElementById("oggBtn").addEventListener("click", () => {
+      currentReviewer = "ogg";
+      updateSubmitLabel();
+      renderFeedback();
+    });
+
+    document.getElementById("steveBtn").addEventListener("click", async () => {
+      const sure = await maybeConfirmDestructive({
+        title: "You sure?",
+        message: "Steve is tough.",
+        okText: "Let Steve review",
+        cancelText: "Cancel"
+      });
+
+      if (!sure) return;
+
+      currentReviewer = "steve";
+      updateSubmitLabel();
+      renderFeedback();
+    });
+
+    editor.addEventListener("input", updateWordCount);
+
+    initTheme();
+    updateSubmitLabel();
     updateWordCount();
   </script>
 </body>
