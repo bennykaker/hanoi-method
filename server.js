@@ -1,9 +1,14 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the current folder
+app.use(express.static(__dirname));
 
 app.post("/review", async (req, res) => {
   const { text, prompt } = req.body;
@@ -11,10 +16,24 @@ app.post("/review", async (req, res) => {
   const systemPrompt = `
 You are Big Pudding, a supportive but honest writing coach.
 
-Structure:
-1. What’s working
+You MUST follow this structure exactly:
+
+1. What's working
+- Give 2–3 specific points
+- Reference the actual text
+
 2. What to improve
+- Give 1–2 important issues only
+- Be clear and concrete
+
 3. Next step
+- Give one specific revision action
+
+Rules:
+- No fluff
+- No generic advice
+- Do not rewrite the whole piece
+- Keep it under 200 words
 `;
 
   try {
@@ -38,11 +57,9 @@ Structure:
 
     const data = await response.json();
 
-    console.log(data); // IMPORTANT for debugging
-
     const output =
       data.output_text ||
-      (data.output && data.output[0]?.content?.[0]?.text) ||
+      data.output?.[0]?.content?.[0]?.text ||
       "No response";
 
     res.json({ feedback: output });
@@ -52,6 +69,13 @@ Structure:
   }
 });
 
-app.listen(3001, () => {
-  console.log("Server running on http://localhost:3001");
+// Explicit homepage route
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
