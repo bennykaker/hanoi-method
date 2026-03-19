@@ -20,6 +20,19 @@
       --max-width: 980px;
     }
 
+    html[data-theme="paper"] {
+      --bg: #ebe7df;
+      --panel: #f1ede4;
+      --panel-soft: #e4ded2;
+      --text: #34322d;
+      --muted: #7a746a;
+      --border: #cfc7b8;
+      --accent: #3a3833;
+      --accent-hover: #4a4741;
+      --danger: #8a5a5a;
+      --shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+    }
+
     html[data-theme="dark"] {
       --bg: #161616;
       --panel: #202020;
@@ -89,25 +102,35 @@
       gap: 10px;
     }
 
-    .theme-toggle {
+    .theme-switcher {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
       border: 1px solid var(--border);
       background: var(--panel);
-      color: var(--text);
       border-radius: 999px;
-      padding: 9px 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .theme-option {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 8px 12px;
       cursor: pointer;
-      transition: border-color 0.15s ease, background 0.15s ease;
-      white-space: nowrap;
+      transition: background 0.15s ease, color 0.15s ease;
+      min-height: 36px;
     }
 
-    .theme-toggle:hover {
-      border-color: #bdb4a3;
-      background: #faf8f3;
+    .theme-option:hover {
+      color: var(--text);
     }
 
-    html[data-theme="dark"] .theme-toggle:hover {
-      background: #2a2a2a;
-      border-color: #575757;
+    .theme-option.active {
+      background: var(--accent);
+      color: var(--bg);
     }
 
     .stack {
@@ -156,8 +179,8 @@
       padding: 16px;
       display: flex;
       flex-direction: column;
-      height: min(50vh, 500px);
-      max-height: min(50vh, 500px);
+      height: min(46vh, 440px);
+      max-height: min(46vh, 440px);
     }
 
     .editor {
@@ -173,7 +196,6 @@
       color: var(--text);
       font-size: 1.08rem;
       line-height: 1.7;
-      spellcheck: false;
     }
 
     .editor::placeholder {
@@ -354,7 +376,7 @@
       pointer-events: none;
       transition: opacity 0.14s ease;
       z-index: 10;
-      box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
     }
 
     .tooltip-wrap:hover .tooltip,
@@ -459,8 +481,8 @@
       }
 
       .editor-card {
-        height: min(46vh, 420px);
-        max-height: min(46vh, 420px);
+        height: min(42vh, 380px);
+        max-height: min(42vh, 380px);
       }
 
       .editor {
@@ -507,7 +529,11 @@
       <div class="brand">Hanoi Method Writing Exercises</div>
 
       <div class="header-actions">
-        <button class="theme-toggle" id="themeToggle" type="button">Dark mode</button>
+        <div class="theme-switcher" role="group" aria-label="Theme">
+          <button class="theme-option" data-theme-option="light" type="button">Light</button>
+          <button class="theme-option" data-theme-option="paper" type="button">Paper</button>
+          <button class="theme-option" data-theme-option="dark" type="button">Dark</button>
+        </div>
       </div>
     </header>
 
@@ -569,12 +595,17 @@
           <button class="primary-btn" id="backToDraftBtn" style="width:auto;" type="button">Back to draft</button>
           <button class="ghost-btn" id="tryAnotherBtn" type="button">Try another prompt</button>
 
-          <div class="tooltip-wrap">
+          <div class="tooltip-wrap" id="puddingWrap">
+            <button class="ghost-btn" id="puddingBtn" type="button">See what Big Pudding thinks</button>
+            <div class="tooltip">Supportive. Focuses on what’s already working.</div>
+          </div>
+
+          <div class="tooltip-wrap" id="oggWrap">
             <button class="ghost-btn" id="oggBtn" type="button">See what Ogg thinks</button>
             <div class="tooltip">Balanced. Clear strengths and clear fixes.</div>
           </div>
 
-          <div class="tooltip-wrap">
+          <div class="tooltip-wrap" id="steveWrap">
             <button class="danger-btn" id="steveBtn" type="button">Let Steve review</button>
             <div class="tooltip">Direct. No fluff. Deadline mode.</div>
           </div>
@@ -655,6 +686,8 @@
       }
     };
 
+    const themes = ["light", "paper", "dark"];
+
     const promptText = document.getElementById("promptText");
     const editor = document.getElementById("editor");
     const wordCount = document.getElementById("wordCount");
@@ -664,7 +697,11 @@
     const feedbackHeading = document.getElementById("feedbackHeading");
     const feedbackBody = document.getElementById("feedbackBody");
     const reviewerModal = document.getElementById("reviewerModal");
-    const themeToggle = document.getElementById("themeToggle");
+    const themeOptions = document.querySelectorAll("[data-theme-option]");
+
+    const puddingWrap = document.getElementById("puddingWrap");
+    const oggWrap = document.getElementById("oggWrap");
+    const steveWrap = document.getElementById("steveWrap");
 
     const confirmModal = document.getElementById("confirmModal");
     const confirmTitle = document.getElementById("confirmTitle");
@@ -689,6 +726,12 @@
 
     function updateSubmitLabel() {
       submitBtn.textContent = reviewerMeta[currentReviewer].button;
+    }
+
+    function updateReviewerButtons() {
+      puddingWrap.style.display = currentReviewer === "pudding" ? "none" : "inline-flex";
+      oggWrap.style.display = currentReviewer === "ogg" ? "none" : "inline-flex";
+      steveWrap.style.display = currentReviewer === "steve" ? "none" : "inline-flex";
     }
 
     function setReviewerVisualSelection(value) {
@@ -796,6 +839,7 @@
       feedbackHeading.textContent = meta.heading;
       feedbackBody.textContent = meta.feedback;
       feedbackCard.classList.add("active");
+      updateReviewerButtons();
     }
 
     function beginReview() {
@@ -828,15 +872,21 @@
       editor.focus();
     }
 
+    function updateThemeButtons(theme) {
+      themeOptions.forEach((button) => {
+        button.classList.toggle("active", button.dataset.themeOption === theme);
+      });
+    }
+
     function applyTheme(theme) {
       document.documentElement.setAttribute("data-theme", theme);
       localStorage.setItem("hm-theme", theme);
-      themeToggle.textContent = theme === "dark" ? "Light mode" : "Dark mode";
+      updateThemeButtons(theme);
     }
 
     function initTheme() {
       const savedTheme = localStorage.getItem("hm-theme");
-      if (savedTheme === "dark" || savedTheme === "light") {
+      if (savedTheme && themes.includes(savedTheme)) {
         applyTheme(savedTheme);
         return;
       }
@@ -845,9 +895,10 @@
       applyTheme(prefersDark ? "dark" : "light");
     }
 
-    themeToggle.addEventListener("click", () => {
-      const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
-      applyTheme(currentTheme === "dark" ? "light" : "dark");
+    themeOptions.forEach((button) => {
+      button.addEventListener("click", () => {
+        applyTheme(button.dataset.themeOption);
+      });
     });
 
     document.getElementById("newPromptBtn").addEventListener("click", setNewPrompt);
@@ -874,6 +925,7 @@
       currentReviewer = selected.value;
       updateSubmitLabel();
       closeReviewerModal();
+      updateReviewerButtons();
     });
 
     document.getElementById("reviewerList").addEventListener("change", (event) => {
@@ -898,6 +950,12 @@
     });
 
     document.getElementById("tryAnotherBtn").addEventListener("click", setNewPrompt);
+
+    document.getElementById("puddingBtn").addEventListener("click", () => {
+      currentReviewer = "pudding";
+      updateSubmitLabel();
+      renderFeedback();
+    });
 
     document.getElementById("oggBtn").addEventListener("click", () => {
       currentReviewer = "ogg";
@@ -925,6 +983,7 @@
     initTheme();
     updateSubmitLabel();
     updateWordCount();
+    updateReviewerButtons();
   </script>
 </body>
 </html>
