@@ -635,12 +635,63 @@
   </div>
 
   <script>
-    const prompts = [
-      "Write a scene where a character lies convincingly — but the reader can tell they’re lying.",
-      "Write a moment where someone wants to apologize but cannot quite do it.",
-      "Write a scene where two people want different things but are trying to stay polite.",
-      "Write a paragraph that turns an ordinary room into a place charged with tension."
-    ];
+ const prompts = [
+  // TENSION
+  "Someone is hiding something obvious. The other person pretends not to notice.",
+  "A character receives news they don’t understand yet—but the reader does.",
+  "Two people argue politely about something serious.",
+  "A character is waiting for something that is already too late.",
+  "Write a scene where someone realizes they’ve been lied to—but says nothing.",
+  "A character tries to keep control of a situation that is slipping away.",
+
+  // DIALOGUE
+  "Write a conversation where one person is lying and the other almost catches it.",
+  "Write dialogue where the meaning is mostly in what is NOT said.",
+  "One character is trying to leave; the other keeps them talking.",
+  "A character asks a simple question that the other refuses to answer directly.",
+  "Write a conversation where both people think they are winning.",
+  "Two people talk about one thing but clearly mean something else.",
+
+  // CHARACTER
+  "Show a character who wants approval but pretends not to care.",
+  "A character makes a bad decision and immediately justifies it.",
+  "Someone tries to appear calm while internally panicking.",
+  "A character lies to themselves more than to others.",
+  "Show a character trying to impress someone who is not impressed.",
+  "A character realizes they are the problem but keeps blaming others.",
+
+  // DESCRIPTION
+  "Describe a room that reveals the personality of its owner.",
+  "Show a setting that feels safe at first, then slowly unsettling.",
+  "Describe a place without naming what it is.",
+  "Write a scene where the weather reflects the emotional tone.",
+  "Describe a space that has just been abandoned.",
+  "Show a familiar place that now feels different.",
+
+  // CONSTRAINT
+  "Write a scene without using adverbs.",
+  "Write a scene with only one line of dialogue.",
+  "Write in present tense, then switch to past halfway through.",
+  "No dialogue. Only action.",
+  "Every sentence must contain a concrete detail.",
+  "Write a scene using only short sentences.",
+
+  // SITUATION
+  "A character arrives somewhere they are not welcome.",
+  "Someone is forced to apologize but doesn’t mean it.",
+  "A character discovers something they were not supposed to find.",
+  "Two characters want opposite outcomes from the same situation.",
+  "A character tries to undo something they just did.",
+  "Someone gives instructions that are deliberately misleading.",
+
+  // SUBTEXT
+  "Write a scene where the truth is never stated directly.",
+  "A character says the opposite of what they mean.",
+  "Two people share a secret without acknowledging it.",
+  "Write a moment where silence carries the meaning.",
+  "A character avoids answering the real question.",
+  "Something important is revealed through a small detail."
+];
 
     const reviewerMeta = {
       pudding: {
@@ -765,11 +816,17 @@
       return await openConfirmModal({ title, message, okText, cancelText });
     }
 
-    function getRandomPrompt() {
-      const current = promptText.textContent.trim();
-      const candidates = prompts.filter((p) => p !== current);
-      return candidates[Math.floor(Math.random() * candidates.length)] || prompts[0];
-    }
+  let lastPrompt = "";
+
+function getRandomPrompt() {
+  let next;
+  do {
+    next = prompts[Math.floor(Math.random() * prompts.length)];
+  } while (next === lastPrompt);
+
+  lastPrompt = next;
+  return next;
+}
 
     async function setNewPrompt() {
       if (editor.value.trim()) {
