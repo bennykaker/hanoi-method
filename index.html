@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hanoi Method Writing Exercises</title>
+  <title>Hanoi Method</title>
   <style>
     :root {
       --bg: #f5f3ee;
@@ -15,6 +15,8 @@
       --accent: #1f1f1c;
       --accent-hover: #353530;
       --danger: #7a2e2e;
+      --danger-bg: #fff5f5;
+      --danger-border: #f5c6c6;
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
       --radius: 16px;
       --max-width: 980px;
@@ -30,6 +32,8 @@
       --accent: #3a3833;
       --accent-hover: #4a4741;
       --danger: #8a5a5a;
+      --danger-bg: #f5eeee;
+      --danger-border: #dfc8c8;
       --shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
     }
 
@@ -43,6 +47,8 @@
       --accent: #f1efe9;
       --accent-hover: #ddd8ce;
       --danger: #ff9f9f;
+      --danger-bg: #2a1a1a;
+      --danger-border: #5a3030;
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
     }
 
@@ -118,6 +124,38 @@
       color: var(--bg);
     }
 
+    /* Mode tabs */
+    .mode-tabs {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+    }
+
+    .mode-tab {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 0.93rem;
+      font-weight: 500;
+      transition: background 0.15s ease, color 0.15s ease;
+      min-height: 36px;
+    }
+
+    .mode-tab:hover { color: var(--text); }
+    .mode-tab.active {
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 600;
+    }
+
     .stack {
       display: grid;
       gap: 18px;
@@ -151,6 +189,7 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      margin-bottom: 4px;
     }
 
     .prompt-text {
@@ -158,6 +197,77 @@
       font-size: 1.08rem;
       font-weight: 600;
       max-width: 60ch;
+    }
+
+    .exercise-meta {
+      margin: 6px 0 0;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    /* Category pills */
+    .category-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .cat-pill {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .cat-pill:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
+
+    .cat-pill.active {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+
+    /* Exercise nav */
+    .exercise-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .ex-nav-btn {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .ex-nav-btn:hover { color: var(--text); border-color: var(--text); }
+    .ex-nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .ex-nav-count {
+      font-size: 0.84rem;
+      color: var(--muted);
+      flex: 1;
+      text-align: center;
     }
 
     .editor-card {
@@ -202,6 +312,14 @@
     html[data-theme="dark"] .editor-meta {
       border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
+
+    .word-count {
+      transition: color 0.3s ease;
+    }
+
+    .word-count.wc-ok { color: #22c55e; }
+    .word-count.wc-short { color: var(--muted); }
+    .word-count.wc-over { color: #f59e0b; }
 
     .controls {
       display: grid;
@@ -286,6 +404,25 @@
       display: block;
     }
 
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .feedback-card.active {
+      animation: slideUp 0.22s ease;
+    }
+
+    .feedback-card.steve-mode {
+      border-color: var(--danger-border);
+      background: var(--danger-bg);
+    }
+
+    html[data-theme="dark"] .feedback-card.steve-mode {
+      border-color: #5a3030;
+      background: #1e1010;
+    }
+
     .status-title,
     .feedback-title,
     .error-title {
@@ -302,7 +439,47 @@
       color: var(--muted);
     }
 
-    .feedback-body,
+    /* Feedback body: structured rendering */
+    .feedback-body {
+      margin: 0;
+      white-space: pre-wrap;
+      line-height: 1.65;
+    }
+
+    .feedback-body.formatted {
+      white-space: normal;
+    }
+
+    .feedback-section {
+      margin-bottom: 14px;
+    }
+
+    .feedback-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .feedback-section-head {
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .feedback-section-items {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .feedback-section-items li {
+      margin-bottom: 4px;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .feedback-section-body {
+      color: var(--text);
+      line-height: 1.55;
+    }
+
     .error-body {
       margin: 0;
       white-space: pre-wrap;
@@ -356,6 +533,19 @@
       opacity: 1;
     }
 
+    /* Streaming cursor */
+    .streaming-cursor::after {
+      content: "▋";
+      animation: blink 0.7s step-end infinite;
+      color: var(--muted);
+      font-size: 0.9em;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -364,6 +554,7 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
+      z-index: 100;
     }
 
     .modal-backdrop.active {
@@ -433,6 +624,21 @@
       gap: 10px;
     }
 
+    /* Saved indicator */
+    .saved-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    .saved-dot.visible { opacity: 1; }
+
     @media (max-width: 720px) {
       .app {
         padding: 18px 14px 32px;
@@ -445,6 +651,7 @@
 
       .header-actions {
         justify-content: flex-start;
+        flex-wrap: wrap;
       }
 
       .prompt-head {
@@ -498,9 +705,14 @@
 <body>
   <main class="app">
     <header class="topbar">
-      <div class="brand">Hanoi Method Writing Exercises</div>
+      <div class="brand">Hanoi Method</div>
 
       <div class="header-actions">
+        <div class="mode-tabs" role="group" aria-label="Mode">
+          <button class="mode-tab active" data-mode="freewrite" type="button">Free write</button>
+          <button class="mode-tab" data-mode="exercises" type="button">Exercises</button>
+        </div>
+
         <div class="theme-switcher" role="group" aria-label="Theme">
           <button class="theme-option" data-theme-option="light" type="button">Light</button>
           <button class="theme-option" data-theme-option="paper" type="button">Paper</button>
@@ -512,14 +724,42 @@
     <section class="stack">
       <article class="panel prompt-card">
         <div class="prompt-head">
-          <div>
-            <span class="eyebrow">Prompt</span>
+          <div id="promptHeadContent">
+            <span class="eyebrow" id="promptEyebrow">Prompt</span>
             <p class="prompt-text" id="promptText">
-              Write a scene where a character lies convincingly — but the reader can tell they’re lying.
+              Write a scene where a character lies convincingly — but the reader can tell they're lying.
             </p>
           </div>
 
           <button class="secondary-btn" id="newPromptBtn" type="button">New prompt</button>
+        </div>
+
+        <!-- Free write: category filter -->
+        <div class="category-row" id="categoryRow">
+          <button class="cat-pill active" data-cat="all" type="button">All</button>
+          <button class="cat-pill" data-cat="warmup" type="button">Warmup</button>
+          <button class="cat-pill" data-cat="tension" type="button">Tension</button>
+          <button class="cat-pill" data-cat="dialogue" type="button">Dialogue</button>
+          <button class="cat-pill" data-cat="character" type="button">Character</button>
+          <button class="cat-pill" data-cat="description" type="button">Description</button>
+          <button class="cat-pill" data-cat="constraint" type="button">Constraint</button>
+          <button class="cat-pill" data-cat="situation" type="button">Situation</button>
+          <button class="cat-pill" data-cat="subtext" type="button">Subtext</button>
+        </div>
+
+        <!-- Exercises: category filter + nav -->
+        <div class="category-row" id="exerciseCategoryRow" style="display:none;">
+          <button class="cat-pill active" data-excat="all" type="button">All</button>
+          <button class="cat-pill" data-excat="dialogue" type="button">Dialogue</button>
+          <button class="cat-pill" data-excat="scene" type="button">Scene</button>
+          <button class="cat-pill" data-excat="description" type="button">Description</button>
+          <button class="cat-pill" data-excat="voice" type="button">Voice</button>
+        </div>
+
+        <div class="exercise-nav" id="exerciseNav" style="display:none;">
+          <button class="ex-nav-btn" id="exPrevBtn" type="button">← Prev</button>
+          <span class="ex-nav-count" id="exNavCount">1 / 24</span>
+          <button class="ex-nav-btn" id="exNextBtn" type="button">Next →</button>
         </div>
       </article>
 
@@ -536,8 +776,11 @@
         ></textarea>
 
         <div class="editor-meta">
-          <div id="wordCount">0 words</div>
-          <div>Target: 250–500 words</div>
+          <div>
+            <span class="saved-dot" id="savedDot"></span>
+            <span class="word-count" id="wordCount">0 words</span>
+          </div>
+          <div id="wordTarget">Target: 250–500 words</div>
         </div>
       </article>
 
@@ -551,34 +794,34 @@
       </section>
 
       <article id="statusCard" class="panel status-card" aria-live="polite">
-        <h2 class="status-title">Reviewing your piece…</h2>
+        <h2 class="status-title" id="statusTitle">Reviewing your piece…</h2>
         <div class="muted">While you wait:</div>
-        <ul class="wait-list">
+        <ul class="wait-list" id="waitList">
           <li>Take a breath and let the draft be ugly.</li>
           <li>The goal is motion, not perfection.</li>
         </ul>
       </article>
 
       <article id="errorCard" class="panel error-card">
-        <h2 class="error-title">Couldn’t get feedback</h2>
+        <h2 class="error-title">Couldn't get feedback</h2>
         <p class="error-body" id="errorBody"></p>
       </article>
 
       <article id="feedbackCard" class="panel feedback-card">
         <h2 class="feedback-title" id="feedbackHeading">Big Pudding says (supportive):</h2>
-        <p class="feedback-body" id="feedbackBody"></p>
+        <div class="feedback-body" id="feedbackBody"></div>
 
         <div class="feedback-actions">
           <button class="primary-btn" id="backToDraftBtn" style="width:auto;" type="button">Back to draft</button>
           <button class="ghost-btn" id="tryAnotherBtn" type="button">Try another prompt</button>
 
           <div class="tooltip-wrap" id="puddingWrap">
-            <button class="ghost-btn" id="puddingBtn" type="button">See what Big Pudding thinks</button>
-            <div class="tooltip">Supportive. Focuses on what’s already working.</div>
+            <button class="ghost-btn" id="puddingBtn" type="button">Big Pudding</button>
+            <div class="tooltip">Supportive. Focuses on what's already working.</div>
           </div>
 
           <div class="tooltip-wrap" id="oggWrap">
-            <button class="ghost-btn" id="oggBtn" type="button">See what Ogg thinks</button>
+            <button class="ghost-btn" id="oggBtn" type="button">Professor Ogg</button>
             <div class="tooltip">Balanced. Clear strengths and clear fixes.</div>
           </div>
 
@@ -599,7 +842,7 @@
         <label class="reviewer-option selected">
           <input type="radio" name="reviewer" value="pudding" checked />
           <span class="reviewer-name">Big Pudding</span>
-          <p class="reviewer-desc">Supportive. Focuses on what’s already working.</p>
+          <p class="reviewer-desc">Supportive. Focuses on what's already working.</p>
         </label>
 
         <label class="reviewer-option">
@@ -635,108 +878,182 @@
   </div>
 
   <script>
- const prompts = [
-  // TENSION
-  "Someone is hiding something obvious. The other person pretends not to notice.",
-  "A character receives news they don’t understand yet—but the reader does.",
-  "Two people argue politely about something serious.",
-  "A character is waiting for something that is already too late.",
-  "Write a scene where someone realizes they’ve been lied to—but says nothing.",
-  "A character tries to keep control of a situation that is slipping away.",
+    // ─── DATA ───────────────────────────────────────────────────────────────────
 
-  // DIALOGUE
-  "Write a conversation where one person is lying and the other almost catches it.",
-  "Write dialogue where the meaning is mostly in what is NOT said.",
-  "One character is trying to leave; the other keeps them talking.",
-  "A character asks a simple question that the other refuses to answer directly.",
-  "Write a conversation where both people think they are winning.",
-  "Two people talk about one thing but clearly mean something else.",
+    const prompts = {
+      tension: [
+        "Someone is hiding something obvious. The other person pretends not to notice.",
+        "A character receives news they don't understand yet—but the reader does.",
+        "Two people argue politely about something serious.",
+        "A character is waiting for something that is already too late.",
+        "Write a scene where someone realizes they've been lied to—but says nothing.",
+        "A character tries to keep control of a situation that is slipping away."
+      ],
+      dialogue: [
+        "Write a conversation where one person is lying and the other almost catches it.",
+        "Write dialogue where the meaning is mostly in what is NOT said.",
+        "One character is trying to leave; the other keeps them talking.",
+        "A character asks a simple question that the other refuses to answer directly.",
+        "Write a conversation where both people think they are winning.",
+        "Two people talk about one thing but clearly mean something else."
+      ],
+      character: [
+        "Show a character who wants approval but pretends not to care.",
+        "A character makes a bad decision and immediately justifies it.",
+        "Someone tries to appear calm while internally panicking.",
+        "A character lies to themselves more than to others.",
+        "Show a character trying to impress someone who is not impressed.",
+        "A character realizes they are the problem but keeps blaming others."
+      ],
+      description: [
+        "Describe a room that reveals the personality of its owner.",
+        "Show a setting that feels safe at first, then slowly unsettling.",
+        "Describe a place without naming what it is.",
+        "Write a scene where the weather reflects the emotional tone.",
+        "Describe a space that has just been abandoned.",
+        "Show a familiar place that now feels different."
+      ],
+      warmup: [
+        "Describe a young man running for his life. No adverbs.",
+        "A woman waits at a bus stop in the rain. No weather words.",
+        "Describe hands. Do not describe the person they belong to.",
+        "A door opens. Three sentences only. Make it feel like a threat.",
+        "Describe a meal going cold. No emotions. No thoughts.",
+        "Someone walks into a room and stops. No dialogue. No explanation.",
+        "Describe a car at night. No adjectives.",
+        "A phone rings. Nobody picks it up. Fifty words maximum.",
+        "Describe a crowd from above. No individuals. No names.",
+        "An empty chair. Make it sad without saying it is sad.",
+        "Two sentences: one about the sky, one about the floor. Nothing in between.",
+        "Describe a dog waiting. No adverbs. No adjectives.",
+        "A train window. Describe what passes. Only concrete nouns.",
+        "Someone counts to ten. Show it without numbers.",
+        "Describe a fire going out. No metaphors.",
+        "A glass of water. Make it feel dangerous. Fifty words maximum.",
+        "Describe running shoes that have been used hard. No owner. No story.",
+        "A light turning off. No people. No sound words.",
+        "Describe a street at 4am. Only what the eyes can see.",
+        "Someone packs a bag quickly. No interiority. Only action."
+      ],
+      constraint: [
+        "Write a scene without using adverbs.",
+        "Write a scene with only one line of dialogue.",
+        "Write in present tense, then switch to past halfway through.",
+        "No dialogue. Only action.",
+        "Every sentence must contain a concrete detail.",
+        "Write a scene using only short sentences."
+      ],
+      situation: [
+        "A character arrives somewhere they are not welcome.",
+        "Someone is forced to apologize but doesn't mean it.",
+        "A character discovers something they were not supposed to find.",
+        "Two characters want opposite outcomes from the same situation.",
+        "A character tries to undo something they just did.",
+        "Someone gives instructions that are deliberately misleading."
+      ],
+      subtext: [
+        "Write a scene where the truth is never stated directly.",
+        "A character says the opposite of what they mean.",
+        "Two people share a secret without acknowledging it.",
+        "Write a moment where silence carries the meaning.",
+        "A character avoids answering the real question.",
+        "Something important is revealed through a small detail."
+      ]
+    };
 
-  // CHARACTER
-  "Show a character who wants approval but pretends not to care.",
-  "A character makes a bad decision and immediately justifies it.",
-  "Someone tries to appear calm while internally panicking.",
-  "A character lies to themselves more than to others.",
-  "Show a character trying to impress someone who is not impressed.",
-  "A character realizes they are the problem but keeps blaming others.",
+    const allPrompts = Object.values(prompts).flat();
 
-  // DESCRIPTION
-  "Describe a room that reveals the personality of its owner.",
-  "Show a setting that feels safe at first, then slowly unsettling.",
-  "Describe a place without naming what it is.",
-  "Write a scene where the weather reflects the emotional tone.",
-  "Describe a space that has just been abandoned.",
-  "Show a familiar place that now feels different.",
-
-  // CONSTRAINT
-  "Write a scene without using adverbs.",
-  "Write a scene with only one line of dialogue.",
-  "Write in present tense, then switch to past halfway through.",
-  "No dialogue. Only action.",
-  "Every sentence must contain a concrete detail.",
-  "Write a scene using only short sentences.",
-
-  // SITUATION
-  "A character arrives somewhere they are not welcome.",
-  "Someone is forced to apologize but doesn’t mean it.",
-  "A character discovers something they were not supposed to find.",
-  "Two characters want opposite outcomes from the same situation.",
-  "A character tries to undo something they just did.",
-  "Someone gives instructions that are deliberately misleading.",
-
-  // SUBTEXT
-  "Write a scene where the truth is never stated directly.",
-  "A character says the opposite of what they mean.",
-  "Two people share a secret without acknowledging it.",
-  "Write a moment where silence carries the meaning.",
-  "A character avoids answering the real question.",
-  "Something important is revealed through a small detail."
-];
+    const exercises = [
+      { id: 1,  category: "dialogue",    title: "Subtext",             prompt: "Write a short scene between two people who want different things. Neither character may say directly what they want. Limit: 120 words." },
+      { id: 2,  category: "dialogue",    title: "Concealed motive",    prompt: "Write a short scene in which one person needs a favour but pretends they are only making conversation. Limit: 120 words." },
+      { id: 3,  category: "scene",       title: "Power shift",         prompt: "Write a short scene in which the balance of power changes once. Do not explain the change. Limit: 120 words." },
+      { id: 4,  category: "dialogue",    title: "Conflict",            prompt: "Write a short scene between two people who are being polite while trying to block each other. Limit: 120 words." },
+      { id: 5,  category: "scene",       title: "Pressure",            prompt: "Write a short scene in which one person is in a hurry and the other refuses to speed up. Limit: 120 words." },
+      { id: 6,  category: "dialogue",    title: "Bad news",            prompt: "Write a short scene in which someone delivers bad news indirectly. Limit: 120 words." },
+      { id: 7,  category: "description", title: "Object",              prompt: "Describe an ordinary object so that it feels charged with emotion, but do not name the emotion. Limit: 120 words." },
+      { id: 8,  category: "scene",       title: "Arrival",             prompt: "Write a short scene in which someone arrives late and tries to hide why. Limit: 120 words." },
+      { id: 9,  category: "voice",       title: "Voice",               prompt: "Write a short scene in which one person is trying to sound calm and fails once. Limit: 120 words." },
+      { id: 10, category: "scene",       title: "Decision",            prompt: "Write a short scene that ends with a decision, but do not state the decision directly. Limit: 120 words." },
+      { id: 11, category: "dialogue",    title: "Avoidance",           prompt: "Write a short scene in which one person avoids answering a simple question three times. Limit: 120 words." },
+      { id: 12, category: "dialogue",    title: "Polite threat",       prompt: "Write a short scene in which a threat is delivered politely. Limit: 120 words." },
+      { id: 13, category: "scene",       title: "Delay",               prompt: "Write a short scene in which someone deliberately stalls for time. Limit: 120 words." },
+      { id: 14, category: "voice",       title: "False calm",          prompt: "Write a short scene in which someone tries to keep the mood light while the stakes are serious. Limit: 120 words." },
+      { id: 15, category: "dialogue",    title: "Distraction",         prompt: "Write a short scene in which one person changes the subject to avoid exposure. Limit: 120 words." },
+      { id: 16, category: "dialogue",    title: "Refusal",             prompt: "Write a short scene in which someone refuses a request without ever saying no. Limit: 120 words." },
+      { id: 17, category: "description", title: "Object description",  prompt: "Describe a room through the eyes of someone who does not want to be there. Limit: 120 words." },
+      { id: 18, category: "scene",       title: "Reversal",            prompt: "Write a short scene in which the person asking for help ends up with leverage. Limit: 120 words." },
+      { id: 19, category: "scene",       title: "Withheld information",prompt: "Write a short scene in which one person knows something the other badly needs to know. Limit: 120 words." },
+      { id: 20, category: "scene",       title: "Exit line",           prompt: "Write a short scene that ends with one line that changes the meaning of everything before it. Limit: 120 words." },
+      { id: 21, category: "description", title: "Weather",             prompt: "Describe bad weather without naming the weather directly. Limit: 120 words." },
+      { id: 22, category: "description", title: "Place pressure",      prompt: "Describe a public place so that it feels hostile without saying it is hostile. Limit: 120 words." },
+      { id: 23, category: "voice",       title: "Pride",               prompt: "Write 6 to 8 lines from someone pretending not to be hurt. Limit: 120 words." },
+      { id: 24, category: "voice",       title: "Control",             prompt: "Write 6 to 8 lines from someone trying very hard to sound in control. Limit: 120 words." }
+    ];
 
     const reviewerMeta = {
-      pudding: {
-        button: "Get feedback",
-        heading: "Big Pudding says (supportive):"
-      },
-      ogg: {
-        button: "Get feedback (Ogg)",
-        heading: "Professor Ogg says (balanced):"
-      },
-      steve: {
-        button: "Get feedback (Steve)",
-        heading: "Steve says (direct):"
-      }
+      pudding: { button: "Get feedback",          heading: "Big Pudding says:" },
+      ogg:     { button: "Get feedback",          heading: "Professor Ogg says:" },
+      steve:   { button: "Get feedback (Steve)",  heading: "Steve says:" }
     };
+
+    const waitingLines = [
+      ["Take a breath and let the draft be ugly.", "The goal is motion, not perfection."],
+      ["Read what you wrote once — just once.", "Then let the reviewer decide."],
+      ["A bad first draft beats a blank page.", "You've already done the hard part."],
+      ["Don't fix it yet.", "See what the feedback says first."]
+    ];
 
     const themes = ["light", "paper", "dark"];
 
-    const promptText = document.getElementById("promptText");
-    const editor = document.getElementById("editor");
-    const wordCount = document.getElementById("wordCount");
-    const submitBtn = document.getElementById("submitBtn");
-    const statusCard = document.getElementById("statusCard");
-    const feedbackCard = document.getElementById("feedbackCard");
-    const errorCard = document.getElementById("errorCard");
-    const errorBody = document.getElementById("errorBody");
-    const feedbackHeading = document.getElementById("feedbackHeading");
-    const feedbackBody = document.getElementById("feedbackBody");
-    const reviewerModal = document.getElementById("reviewerModal");
-    const themeOptions = document.querySelectorAll("[data-theme-option]");
+    // ─── STATE ──────────────────────────────────────────────────────────────────
 
-    const puddingWrap = document.getElementById("puddingWrap");
-    const oggWrap = document.getElementById("oggWrap");
-    const steveWrap = document.getElementById("steveWrap");
-
-    const confirmModal = document.getElementById("confirmModal");
-    const confirmTitle = document.getElementById("confirmTitle");
-    const confirmMessage = document.getElementById("confirmMessage");
-    const confirmCancelBtn = document.getElementById("confirmCancelBtn");
-    const confirmOkBtn = document.getElementById("confirmOkBtn");
-
-    let currentReviewer = "pudding";
-    let confirmResolver = null;
-    let lastSubmittedText = "";
+    let currentMode      = "freewrite";   // "freewrite" | "exercises"
+    let currentReviewer  = "pudding";
+    let activeCategory   = "all";
+    let activeExCategory = "all";
+    let filteredExercises = [...exercises];
+    let currentExIndex   = 0;
+    let lastPrompt       = "";
+    let confirmResolver  = null;
+    let lastSubmittedText   = "";
     let lastSubmittedPrompt = "";
+
+    // ─── ELEMENTS ───────────────────────────────────────────────────────────────
+
+    const promptText       = document.getElementById("promptText");
+    const promptEyebrow    = document.getElementById("promptEyebrow");
+    const editor           = document.getElementById("editor");
+    const wordCountEl      = document.getElementById("wordCount");
+    const wordTarget       = document.getElementById("wordTarget");
+    const savedDot         = document.getElementById("savedDot");
+    const submitBtn        = document.getElementById("submitBtn");
+    const statusCard       = document.getElementById("statusCard");
+    const statusTitle      = document.getElementById("statusTitle");
+    const waitList         = document.getElementById("waitList");
+    const feedbackCard     = document.getElementById("feedbackCard");
+    const errorCard        = document.getElementById("errorCard");
+    const errorBody        = document.getElementById("errorBody");
+    const feedbackHeading  = document.getElementById("feedbackHeading");
+    const feedbackBody     = document.getElementById("feedbackBody");
+    const reviewerModal    = document.getElementById("reviewerModal");
+    const themeOptions     = document.querySelectorAll("[data-theme-option]");
+    const categoryRow      = document.getElementById("categoryRow");
+    const exerciseCatRow   = document.getElementById("exerciseCategoryRow");
+    const exerciseNav      = document.getElementById("exerciseNav");
+    const exPrevBtn        = document.getElementById("exPrevBtn");
+    const exNextBtn        = document.getElementById("exNextBtn");
+    const exNavCount       = document.getElementById("exNavCount");
+    const puddingWrap      = document.getElementById("puddingWrap");
+    const oggWrap          = document.getElementById("oggWrap");
+    const steveWrap        = document.getElementById("steveWrap");
+    const confirmModal     = document.getElementById("confirmModal");
+    const confirmTitle     = document.getElementById("confirmTitle");
+    const confirmMessage   = document.getElementById("confirmMessage");
+    const confirmCancelBtn = document.getElementById("confirmCancelBtn");
+    const confirmOkBtn     = document.getElementById("confirmOkBtn");
+    const newPromptBtn     = document.getElementById("newPromptBtn");
+
+    // ─── WORD COUNT ─────────────────────────────────────────────────────────────
 
     function countWords(text) {
       const trimmed = text.trim();
@@ -744,20 +1061,210 @@
       return trimmed.split(/\s+/).length;
     }
 
+    function getWordTarget() {
+      if (currentMode === "exercises")        return { lo: 80,  hi: 140, label: "Target: ~120 words" };
+      if (activeCategory === "warmup")        return { lo: 40,  hi: 100, label: "Target: 50–100 words" };
+      return                                         { lo: 250, hi: 500, label: "Target: 250–500 words" };
+    }
+
     function updateWordCount() {
       const count = countWords(editor.value);
-      wordCount.textContent = `${count} ${count === 1 ? "word" : "words"}`;
+      wordCountEl.textContent = `${count} ${count === 1 ? "word" : "words"}`;
+
+      const { lo, hi } = getWordTarget();
+
+      wordCountEl.classList.remove("wc-ok", "wc-short", "wc-over");
+      if (count >= lo && count <= hi) {
+        wordCountEl.classList.add("wc-ok");
+      } else if (count > hi) {
+        wordCountEl.classList.add("wc-over");
+      } else {
+        wordCountEl.classList.add("wc-short");
+      }
     }
 
     function updateSubmitLabel() {
-      submitBtn.textContent = reviewerMeta[currentReviewer].button;
+      if (!submitBtn.disabled) {
+        submitBtn.textContent = reviewerMeta[currentReviewer].button;
+      }
     }
 
     function updateReviewerButtons() {
       puddingWrap.style.display = currentReviewer === "pudding" ? "none" : "inline-flex";
-      oggWrap.style.display = currentReviewer === "ogg" ? "none" : "inline-flex";
-      steveWrap.style.display = currentReviewer === "steve" ? "none" : "inline-flex";
+      oggWrap.style.display     = currentReviewer === "ogg"     ? "none" : "inline-flex";
+      steveWrap.style.display   = currentReviewer === "steve"   ? "none" : "inline-flex";
     }
+
+    // ─── AUTO-SAVE ──────────────────────────────────────────────────────────────
+
+    const DRAFT_KEY = "hm-draft";
+    let saveTimeout;
+    let savedDotTimer;
+
+    function triggerAutoSave() {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        localStorage.setItem(DRAFT_KEY, editor.value);
+        savedDot.classList.add("visible");
+        clearTimeout(savedDotTimer);
+        savedDotTimer = setTimeout(() => savedDot.classList.remove("visible"), 1500);
+      }, 600);
+    }
+
+    function restoreDraft() {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        editor.value = saved;
+        updateWordCount();
+      }
+    }
+
+    // ─── MODES ──────────────────────────────────────────────────────────────────
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll(".mode-tab").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.mode === mode);
+      });
+
+      if (mode === "freewrite") {
+        categoryRow.style.display     = "";
+        exerciseCatRow.style.display  = "none";
+        exerciseNav.style.display     = "none";
+        newPromptBtn.textContent      = "New prompt";
+        const t = getWordTarget();
+        wordTarget.textContent        = t.label;
+        editor.placeholder            = `Start writing… (${t.label.replace("Target: ", "").toLowerCase()} is a good target)`;
+        showFreeWritePrompt();
+      } else {
+        categoryRow.style.display     = "none";
+        exerciseCatRow.style.display  = "";
+        exerciseNav.style.display     = "";
+        newPromptBtn.style.display    = "none";
+        wordTarget.textContent        = "Target: ~120 words";
+        editor.placeholder            = "Start writing… (aim for about 120 words)";
+        applyExerciseFilter();
+      }
+
+      updateWordCount();
+    }
+
+    // ─── FREE WRITE PROMPTS ─────────────────────────────────────────────────────
+
+    function getPromptPool() {
+      if (activeCategory === "all") return allPrompts;
+      return prompts[activeCategory] || allPrompts;
+    }
+
+    function getRandomPrompt() {
+      const pool = getPromptPool();
+      let next;
+      do {
+        next = pool[Math.floor(Math.random() * pool.length)];
+      } while (next === lastPrompt && pool.length > 1);
+      lastPrompt = next;
+      return next;
+    }
+
+    function showFreeWritePrompt() {
+      promptEyebrow.textContent = "Prompt";
+      document.getElementById("promptHeadContent").querySelector(".exercise-meta")?.remove();
+      promptText.textContent = getRandomPrompt();
+      newPromptBtn.style.display = "";
+    }
+
+    // ─── EXERCISES ──────────────────────────────────────────────────────────────
+
+    function applyExerciseFilter() {
+      filteredExercises = activeExCategory === "all"
+        ? [...exercises]
+        : exercises.filter(e => e.category === activeExCategory);
+
+      currentExIndex = 0;
+      showCurrentExercise();
+    }
+
+    function showCurrentExercise() {
+      const ex = filteredExercises[currentExIndex];
+      if (!ex) return;
+
+      promptEyebrow.textContent = `Exercise · ${ex.category}`;
+      promptText.textContent    = ex.title;
+
+      // Show/update subtitle
+      let meta = document.getElementById("promptHeadContent").querySelector(".exercise-meta");
+      if (!meta) {
+        meta = document.createElement("p");
+        meta.className = "exercise-meta";
+        document.getElementById("promptHeadContent").appendChild(meta);
+      }
+      meta.textContent = ex.prompt;
+
+      exNavCount.textContent = `${currentExIndex + 1} / ${filteredExercises.length}`;
+      exPrevBtn.disabled     = currentExIndex === 0;
+      exNextBtn.disabled     = currentExIndex === filteredExercises.length - 1;
+    }
+
+    function getCurrentPromptText() {
+      if (currentMode === "exercises") {
+        const ex = filteredExercises[currentExIndex];
+        return ex ? `${ex.title}: ${ex.prompt}` : "";
+      }
+      return promptText.textContent.trim();
+    }
+
+    // ─── FEEDBACK FORMATTING ────────────────────────────────────────────────────
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function formatFeedbackHtml(text) {
+      // Split into sections on double newline or numbered header
+      const sections = text.split(/\n{2,}/);
+      let html = "";
+
+      for (const section of sections) {
+        const trimmed = section.trim();
+        if (!trimmed) continue;
+
+        // Numbered section header: "1. Title" or "1. Title\n- item..."
+        const numbered = trimmed.match(/^(\d+\.\s+.+?)(\n[\s\S]+)?$/);
+        if (numbered) {
+          const headerLine = escapeHtml(numbered[1]);
+          const rest       = numbered[2] ? numbered[2].trim() : "";
+          const lines      = rest ? rest.split("\n").map(l => l.trim()).filter(Boolean) : [];
+
+          html += `<div class="feedback-section"><span class="feedback-section-head">${headerLine}</span>`;
+
+          const bulletLines = lines.filter(l => l.startsWith("- ") || l.startsWith("• "));
+          const plainLines  = lines.filter(l => !l.startsWith("- ") && !l.startsWith("• "));
+
+          if (bulletLines.length) {
+            html += `<ul class="feedback-section-items">`;
+            for (const b of bulletLines) {
+              html += `<li>${escapeHtml(b.replace(/^[-•]\s+/, ""))}</li>`;
+            }
+            html += `</ul>`;
+          }
+
+          if (plainLines.length) {
+            html += `<p class="feedback-section-body">${escapeHtml(plainLines.join(" "))}</p>`;
+          }
+
+          html += `</div>`;
+        } else {
+          html += `<p class="feedback-section-body">${escapeHtml(trimmed)}</p>`;
+        }
+      }
+
+      return html;
+    }
+
+    // ─── MODAL HELPERS ──────────────────────────────────────────────────────────
 
     function setReviewerVisualSelection(value) {
       document.querySelectorAll(".reviewer-option").forEach((option) => {
@@ -778,61 +1285,29 @@
       reviewerModal.setAttribute("aria-hidden", "true");
     }
 
-    function openConfirmModal({
-      title = "Are you sure?",
-      message = "",
-      okText = "OK",
-      cancelText = "Cancel"
-    }) {
-      confirmTitle.textContent = title;
+    function openConfirmModal({ title = "Are you sure?", message = "", okText = "OK", cancelText = "Cancel" }) {
+      confirmTitle.textContent   = title;
       confirmMessage.textContent = message;
-      confirmOkBtn.textContent = okText;
+      confirmOkBtn.textContent   = okText;
       confirmCancelBtn.textContent = cancelText;
-
       confirmModal.classList.add("active");
       confirmModal.setAttribute("aria-hidden", "false");
-
-      return new Promise((resolve) => {
-        confirmResolver = resolve;
-      });
+      return new Promise((resolve) => { confirmResolver = resolve; });
     }
 
     function closeConfirmModal(result) {
       confirmModal.classList.remove("active");
       confirmModal.setAttribute("aria-hidden", "true");
-
-      if (confirmResolver) {
-        confirmResolver(result);
-        confirmResolver = null;
-      }
+      if (confirmResolver) { confirmResolver(result); confirmResolver = null; }
     }
 
-    async function maybeConfirmDestructive({
-      title = "Are you sure?",
-      message = "",
-      okText = "OK",
-      cancelText = "Cancel"
-    }) {
-      return await openConfirmModal({ title, message, okText, cancelText });
-    }
-
-  let lastPrompt = "";
-
-function getRandomPrompt() {
-  let next;
-  do {
-    next = prompts[Math.floor(Math.random() * prompts.length)];
-  } while (next === lastPrompt);
-
-  lastPrompt = next;
-  return next;
-}
+    // ─── PROMPT ACTIONS ─────────────────────────────────────────────────────────
 
     async function setNewPrompt() {
       if (editor.value.trim()) {
-        const ok = await maybeConfirmDestructive({
+        const ok = await openConfirmModal({
           title: "Start a new prompt?",
-          message: "This will clear your current draft and load a new prompt.",
+          message: "This will clear your current draft.",
           okText: "New prompt",
           cancelText: "Cancel"
         });
@@ -840,10 +1315,18 @@ function getRandomPrompt() {
       }
 
       editor.value = "";
-      promptText.textContent = getRandomPrompt();
+      localStorage.removeItem(DRAFT_KEY);
       feedbackCard.classList.remove("active");
       errorCard.classList.remove("active");
       statusCard.classList.remove("active");
+
+      if (currentMode === "freewrite") {
+        showFreeWritePrompt();
+      } else {
+        currentExIndex = 0;
+        showCurrentExercise();
+      }
+
       updateWordCount();
       editor.focus();
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -851,19 +1334,62 @@ function getRandomPrompt() {
 
     async function clearDraft() {
       if (!editor.value.trim()) return;
-
-      const ok = await maybeConfirmDestructive({
+      const ok = await openConfirmModal({
         title: "Clear draft?",
         message: "This will remove everything in the writing box.",
         okText: "Clear it",
         cancelText: "Cancel"
       });
-
       if (!ok) return;
-
       editor.value = "";
+      localStorage.removeItem(DRAFT_KEY);
       updateWordCount();
       editor.focus();
+    }
+
+    // ─── STREAMING REVIEW ───────────────────────────────────────────────────────
+
+    async function fetchReviewStream(text, prompt, reviewer, onChunk, onDone, onError) {
+      try {
+        const response = await fetch("/review-stream", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, prompt, reviewer })
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || "Could not get feedback.");
+        }
+
+        const reader  = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const data = line.slice(6).trim();
+            if (data === "[DONE]")  { onDone(); return; }
+            if (data === "[ERROR]") { throw new Error("Server error during streaming."); }
+            try {
+              const event = JSON.parse(data);
+              if (event.delta) onChunk(event.delta);
+            } catch {}
+          }
+        }
+
+        onDone();
+      } catch (err) {
+        onError(err.message || "Something went wrong.");
+      }
     }
 
     function showError(message) {
@@ -872,58 +1398,71 @@ function getRandomPrompt() {
       feedbackCard.classList.remove("active");
     }
 
-    async function fetchReview(text, prompt, reviewer) {
-      const response = await fetch("/review", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ text, prompt, reviewer })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Could not get feedback.");
-      }
-
-      return data.feedback;
-    }
-
     async function runReview(text, prompt, reviewer) {
       submitBtn.disabled = true;
-      submitBtn.textContent = "Reviewing your piece…";
+      submitBtn.textContent = "Reviewing…";
+
+      // Pick a random wait message
+      const [w1, w2] = waitingLines[Math.floor(Math.random() * waitingLines.length)];
+      waitList.innerHTML = `<li>${w1}</li><li>${w2}</li>`;
+
       statusCard.classList.add("active");
       feedbackCard.classList.remove("active");
+      feedbackCard.classList.remove("steve-mode");
       errorCard.classList.remove("active");
 
-      try {
-        const feedback = await fetchReview(text, prompt, reviewer);
-        feedbackHeading.textContent = reviewerMeta[reviewer].heading;
-        feedbackBody.textContent = feedback;
-        feedbackCard.classList.add("active");
-        updateReviewerButtons();
-      } catch (err) {
-        showError(err.message || "Something went wrong.");
-      } finally {
-        statusCard.classList.remove("active");
-        submitBtn.disabled = false;
-        updateSubmitLabel();
-      }
+      let fullText = "";
+      let started  = false;
+
+      await new Promise((resolve) => {
+        fetchReviewStream(
+          text, prompt, reviewer,
+          (delta) => {
+            if (!started) {
+              // First chunk — show feedback card
+              started = true;
+              statusCard.classList.remove("active");
+              feedbackHeading.textContent = reviewerMeta[reviewer].heading;
+              feedbackBody.textContent    = "";
+              feedbackBody.className      = "feedback-body streaming-cursor";
+              if (reviewer === "steve") feedbackCard.classList.add("steve-mode");
+              feedbackCard.classList.add("active");
+              updateReviewerButtons();
+              feedbackCard.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+            fullText += delta;
+            feedbackBody.textContent = fullText;
+          },
+          () => {
+            // Stream complete — format the feedback
+            statusCard.classList.remove("active");
+            feedbackBody.classList.remove("streaming-cursor");
+            feedbackBody.classList.add("formatted");
+            feedbackBody.innerHTML = formatFeedbackHtml(fullText);
+            submitBtn.disabled = false;
+            updateSubmitLabel();
+            resolve();
+          },
+          (err) => {
+            statusCard.classList.remove("active");
+            showError(err);
+            submitBtn.disabled = false;
+            updateSubmitLabel();
+            resolve();
+          }
+        );
+      });
     }
 
     async function beginReview() {
       const text = editor.value.trim();
-
       if (!text) {
         alert("Put some words in the box first.");
         editor.focus();
         return;
       }
-
-      lastSubmittedText = text;
-      lastSubmittedPrompt = promptText.textContent.trim();
-
+      lastSubmittedText   = text;
+      lastSubmittedPrompt = getCurrentPromptText();
       await runReview(lastSubmittedText, lastSubmittedPrompt, currentReviewer);
     }
 
@@ -934,6 +1473,28 @@ function getRandomPrompt() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       editor.focus();
     }
+
+    async function switchReviewer(reviewer) {
+      if (reviewer === "steve" && currentReviewer !== "steve") {
+        const sure = await openConfirmModal({
+          title: "You sure?",
+          message: "Steve is tough.",
+          okText: "Let Steve review",
+          cancelText: "Cancel"
+        });
+        if (!sure) return;
+      }
+
+      currentReviewer = reviewer;
+      updateSubmitLabel();
+      updateReviewerButtons();
+
+      if (lastSubmittedText && lastSubmittedPrompt && feedbackCard.classList.contains("active")) {
+        await runReview(lastSubmittedText, lastSubmittedPrompt, currentReviewer);
+      }
+    }
+
+    // ─── THEME ──────────────────────────────────────────────────────────────────
 
     function updateThemeButtons(theme) {
       themeOptions.forEach((button) => {
@@ -953,43 +1514,52 @@ function getRandomPrompt() {
         applyTheme(savedTheme);
         return;
       }
-
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      applyTheme(prefersDark ? "dark" : "light");
+      applyTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     }
 
-    async function switchReviewer(reviewer) {
-      if (reviewer === "steve" && currentReviewer !== "steve") {
-        const sure = await maybeConfirmDestructive({
-          title: "You sure?",
-          message: "Steve is tough.",
-          okText: "Let Steve review",
-          cancelText: "Cancel"
-        });
-        if (!sure) return;
-      }
+    // ─── EVENT LISTENERS ────────────────────────────────────────────────────────
 
-      currentReviewer = reviewer;
-      updateSubmitLabel();
-      updateReviewerButtons();
+    themeOptions.forEach(btn => btn.addEventListener("click", () => applyTheme(btn.dataset.themeOption)));
 
-      if (lastSubmittedText && lastSubmittedPrompt && feedbackCard.classList.contains("active")) {
-        await runReview(lastSubmittedText, lastSubmittedPrompt, currentReviewer);
-      }
-    }
+    document.querySelectorAll(".mode-tab").forEach(btn => {
+      btn.addEventListener("click", () => setMode(btn.dataset.mode));
+    });
 
-    themeOptions.forEach((button) => {
-      button.addEventListener("click", () => {
-        applyTheme(button.dataset.themeOption);
+    document.querySelectorAll("[data-cat]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeCategory = btn.dataset.cat;
+        document.querySelectorAll("[data-cat]").forEach(b => b.classList.toggle("active", b.dataset.cat === activeCategory));
+        const t = getWordTarget();
+        wordTarget.textContent  = t.label;
+        editor.placeholder      = `Start writing… (${t.label.replace("Target: ", "").toLowerCase()} is a good target)`;
+        showFreeWritePrompt();
+        updateWordCount();
       });
     });
 
-    document.getElementById("newPromptBtn").addEventListener("click", setNewPrompt);
+    document.querySelectorAll("[data-excat]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeExCategory = btn.dataset.excat;
+        document.querySelectorAll("[data-excat]").forEach(b => b.classList.toggle("active", b.dataset.excat === activeExCategory));
+        applyExerciseFilter();
+      });
+    });
+
+    exPrevBtn.addEventListener("click", () => {
+      if (currentExIndex > 0) { currentExIndex--; showCurrentExercise(); }
+    });
+
+    exNextBtn.addEventListener("click", () => {
+      if (currentExIndex < filteredExercises.length - 1) { currentExIndex++; showCurrentExercise(); }
+    });
+
+    newPromptBtn.addEventListener("click", setNewPrompt);
     document.getElementById("clearBtn").addEventListener("click", clearDraft);
     document.getElementById("submitBtn").addEventListener("click", beginReview);
     document.getElementById("changeReviewerBtn").addEventListener("click", openReviewerModal);
     document.getElementById("cancelReviewerBtn").addEventListener("click", closeReviewerModal);
     document.getElementById("backToDraftBtn").addEventListener("click", backToDraft);
+    document.getElementById("tryAnotherBtn").addEventListener("click", setNewPrompt);
 
     document.getElementById("saveReviewerBtn").addEventListener("click", async () => {
       const selected = document.querySelector('input[name="reviewer"]:checked');
@@ -999,46 +1569,36 @@ function getRandomPrompt() {
     });
 
     document.getElementById("reviewerList").addEventListener("change", (event) => {
-      if (event.target.name === "reviewer") {
-        setReviewerVisualSelection(event.target.value);
-      }
+      if (event.target.name === "reviewer") setReviewerVisualSelection(event.target.value);
     });
 
     reviewerModal.addEventListener("click", (event) => {
-      if (event.target === reviewerModal) {
-        closeReviewerModal();
-      }
+      if (event.target === reviewerModal) closeReviewerModal();
     });
 
     confirmCancelBtn.addEventListener("click", () => closeConfirmModal(false));
     confirmOkBtn.addEventListener("click", () => closeConfirmModal(true));
-
     confirmModal.addEventListener("click", (event) => {
-      if (event.target === confirmModal) {
-        closeConfirmModal(false);
-      }
+      if (event.target === confirmModal) closeConfirmModal(false);
     });
 
-    document.getElementById("tryAnotherBtn").addEventListener("click", setNewPrompt);
+    document.getElementById("puddingBtn").addEventListener("click", async () => { await switchReviewer("pudding"); });
+    document.getElementById("oggBtn").addEventListener("click",     async () => { await switchReviewer("ogg"); });
+    document.getElementById("steveBtn").addEventListener("click",   async () => { await switchReviewer("steve"); });
 
-    document.getElementById("puddingBtn").addEventListener("click", async () => {
-      await switchReviewer("pudding");
+    editor.addEventListener("input", () => {
+      updateWordCount();
+      triggerAutoSave();
     });
 
-    document.getElementById("oggBtn").addEventListener("click", async () => {
-      await switchReviewer("ogg");
-    });
-
-    document.getElementById("steveBtn").addEventListener("click", async () => {
-      await switchReviewer("steve");
-    });
-
-    editor.addEventListener("input", updateWordCount);
+    // ─── INIT ───────────────────────────────────────────────────────────────────
 
     initTheme();
+    restoreDraft();
     updateSubmitLabel();
     updateWordCount();
     updateReviewerButtons();
+    showFreeWritePrompt();
   </script>
 </body>
 </html>

@@ -154,6 +154,97 @@ app.post("/review", async (req, res) => {
   }
 });
 
+app.post("/review-stream", async (req, res) => {
+  try {
+    const { text, prompt, reviewer } = req.body;
+
+    if (!text || !prompt) {
+      return res.status(400).json({ error: "Missing text or prompt." });
+    }
+
+    const selectedReviewer = ["pudding", "ogg", "steve"].includes(reviewer)
+      ? reviewer
+      : "pudding";
+
+    const systemPrompt = reviewerPrompts[selectedReviewer];
+
+    const upstreamRes = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4.1",
+        stream: true,
+        input: [
+          {
+            role: "system",
+            content: [{ type: "input_text", text: systemPrompt }]
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "input_text",
+                text: `[Prompt]\n${prompt}\n\n[User Writing]\n${text}`
+              }
+            ]
+          }
+        ]
+      })
+    });
+
+    if (!upstreamRes.ok) {
+      const errData = await upstreamRes.json();
+      return res.status(500).json({
+        error: errData?.error?.message || "AI request failed."
+      });
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    const reader = upstreamRes.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const data = line.slice(6).trim();
+        if (data === "[DONE]") continue;
+
+        try {
+          const event = JSON.parse(data);
+          if (event.type === "response.output_text.delta" && event.delta) {
+            res.write(`data: ${JSON.stringify({ delta: event.delta })}\n\n`);
+          }
+        } catch {}
+      }
+    }
+
+    res.write("data: [DONE]\n\n");
+    res.end();
+  } catch (err) {
+    console.error("Stream error:", err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Something broke on the server." });
+    } else {
+      res.write("data: [ERROR]\n\n");
+      res.end();
+    }
+  }
+});
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
