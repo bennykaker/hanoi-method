@@ -234,6 +234,88 @@ app.post("/review", async (req, res) => {
   }
 });
 
+const crackSystemPrompt = `
+You are a story development editor helping a writer crack a story concept in a back-and-forth conversation.
+
+Your job: ask the right questions, challenge weak choices, and help the writer find what the story is really about. You are not a cheerleader — you push. When something is vague, say so. When something is interesting, dig into it.
+
+Return ONLY a JSON object — no markdown, no explanation.
+
+{
+  "reply": "your response — conversational, direct, ask at most one question",
+  "established": ["fact 1", "fact 2", ...],
+  "open": ["question 1", "question 2", ...]
+}
+
+Rules:
+- reply: 2–4 sentences. Engage with what the writer said, then push forward. Ask at most ONE question per turn. Never just validate.
+- established: the cumulative list of everything decided about this story — characters, wants, needs, relationships, plot beats, theme, setting. Carry forward everything from previous turns, add new facts from this turn.
+- open: the 3–5 most important unanswered story questions right now. Update as things get resolved or new questions emerge.
+- Always be pushing toward: What does each character want? What do they need (different from want)? What changes? What is the theme? What is the ending?
+- Return ONLY the JSON. Nothing else.
+`;
+
+app.post("/crack", async (req, res) => {
+  try {
+    const { messages } = req.body;
+
+    if (!messages || !messages.length) {
+      return res.status(400).json({ error: "No messages provided." });
+    }
+
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4.1",
+        text: { format: { type: "json_object" } },
+        input: [
+          {
+            role: "system",
+            content: [{ type: "input_text", text: crackSystemPrompt }]
+          },
+          ...messages.map(m => ({
+            role: m.role,
+            content: [{ type: "input_text", text: m.content }]
+          }))
+        ]
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("OpenAI error:", JSON.stringify(data, null, 2));
+      return res.status(500).json({ error: data?.error?.message || "AI request failed." });
+    }
+
+    const rawText =
+      data.output_text ||
+      data.output?.map(item =>
+        (item.content || [])
+          .filter(c => c.type === "output_text")
+          .map(c => c.text)
+          .join("")
+      ).join("\n").trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(rawText);
+    } catch {
+      console.error("Failed to parse crack JSON:", rawText);
+      return res.status(500).json({ error: "Could not parse response." });
+    }
+
+    res.json(parsed);
+  } catch (err) {
+    console.error("Server error:", err);
+    res.status(500).json({ error: "Something broke on the server." });
+  }
+});
+
 app.post("/review-annotate", async (req, res) => {
   try {
     const { text, prompt, reviewer } = req.body;

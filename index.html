@@ -841,6 +841,239 @@
         width: 220px;
       }
     }
+
+    /* ── Crack mode ─────────────────────────────────────────────────────────── */
+
+    .crack-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 20px;
+      height: min(72vh, 640px);
+    }
+
+    .crack-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel-soft);
+    }
+
+    .crack-sidebar-section {
+      padding: 14px 16px;
+    }
+
+    .crack-sidebar-section + .crack-sidebar-section {
+      border-top: 1px solid var(--border);
+    }
+
+    .crack-sidebar .eyebrow {
+      margin-bottom: 10px;
+    }
+
+    .crack-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .crack-list li {
+      font-size: 0.84rem;
+      line-height: 1.45;
+      color: var(--text);
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .crack-list li::before {
+      content: "·";
+      position: absolute;
+      left: 0;
+      color: var(--muted);
+    }
+
+    .crack-list li.crack-open::before {
+      content: "?";
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: #f59e0b;
+    }
+
+    .crack-list li.crack-empty {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .crack-list li.crack-empty::before { content: ""; }
+
+    .crack-main {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    /* Starters */
+    .crack-starters {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .crack-intro {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .crack-starter-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .crack-starter-btn {
+      text-align: left;
+      background: var(--panel-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-size: 0.88rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+      line-height: 1.4;
+    }
+
+    .crack-starter-btn:hover {
+      border-color: var(--text);
+      background: var(--panel);
+    }
+
+    /* Messages */
+    .crack-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .crack-msg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 88%;
+    }
+
+    .crack-msg-user { align-self: flex-end; align-items: flex-end; }
+    .crack-msg-ai   { align-self: flex-start; align-items: flex-start; }
+
+    .crack-msg-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+
+    .crack-msg-bubble {
+      padding: 10px 13px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .crack-msg-user .crack-msg-bubble {
+      background: var(--accent);
+      color: var(--bg);
+      border-bottom-right-radius: 4px;
+    }
+
+    .crack-msg-ai .crack-msg-bubble {
+      background: var(--panel-soft);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+
+    .crack-msg-ai.crack-thinking .crack-msg-bubble {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* Input area */
+    .crack-input-area {
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      padding: 12px 14px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .crack-input {
+      flex: 1;
+      resize: none;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 13px;
+      background: var(--panel-soft);
+      color: var(--text);
+      font-size: 0.93rem;
+      line-height: 1.5;
+      outline: none;
+      transition: border-color 0.15s ease;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .crack-input:focus { border-color: var(--text); }
+    .crack-input::placeholder { color: var(--muted); }
+
+    .crack-send-btn {
+      flex-shrink: 0;
+      border: 0;
+      background: var(--accent);
+      color: var(--bg);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .crack-send-btn:hover   { background: var(--accent-hover); }
+    .crack-send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .crack-footer {
+      padding: 6px 14px 10px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 720px) {
+      .crack-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .crack-sidebar { height: 200px; }
+      .crack-main    { height: min(60vh, 500px); }
+    }
   </style>
 </head>
 <body>
@@ -852,6 +1085,7 @@
         <div class="mode-tabs" role="group" aria-label="Mode">
           <button class="mode-tab active" data-mode="freewrite" type="button">Free write</button>
           <button class="mode-tab" data-mode="exercises" type="button">Exercises</button>
+          <button class="mode-tab" data-mode="crack" type="button">Crack</button>
         </div>
 
         <div class="theme-switcher" role="group" aria-label="Theme">
@@ -862,6 +1096,7 @@
       </div>
     </header>
 
+    <div id="writingSection">
     <section class="stack">
       <article class="panel prompt-card">
         <div class="prompt-head">
@@ -973,6 +1208,46 @@
         </div>
       </article>
     </section>
+    </div><!-- /writingSection -->
+
+    <div id="crackSection" style="display:none;">
+      <div class="crack-layout">
+
+        <aside class="crack-sidebar">
+          <div class="crack-sidebar-section">
+            <span class="eyebrow">Story so far</span>
+            <ul class="crack-list" id="establishedList">
+              <li class="crack-empty">Nothing established yet.</li>
+            </ul>
+          </div>
+          <div class="crack-sidebar-section">
+            <span class="eyebrow">Open questions</span>
+            <ul class="crack-list" id="openList">
+              <li class="crack-empty">No questions yet.</li>
+            </ul>
+          </div>
+        </aside>
+
+        <div class="crack-main">
+          <div class="crack-starters" id="crackStarters">
+            <p class="crack-intro">Pick a starting point, or describe your own idea in the box below.</p>
+            <div class="crack-starter-grid" id="crackStarterGrid"></div>
+          </div>
+
+          <div class="crack-messages" id="crackMessages" style="display:none;"></div>
+
+          <div class="crack-input-area">
+            <textarea class="crack-input" id="crackInput" placeholder="Describe a story idea, or respond…" rows="2"></textarea>
+            <button class="crack-send-btn" id="crackSendBtn" type="button">Send</button>
+          </div>
+          <div class="crack-footer">
+            <button class="texty-btn" id="crackResetBtn" type="button" style="font-size:0.82rem;">Start over</button>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /crackSection -->
+
   </main>
 
   <div class="modal-backdrop" id="reviewerModal" aria-hidden="true">
@@ -1268,11 +1543,24 @@
         btn.classList.toggle("active", btn.dataset.mode === mode);
       });
 
+      const writingSection = document.getElementById("writingSection");
+      const crackSection   = document.getElementById("crackSection");
+
+      if (mode === "crack") {
+        writingSection.style.display = "none";
+        crackSection.style.display   = "";
+        return;
+      }
+
+      writingSection.style.display = "";
+      crackSection.style.display   = "none";
+
       if (mode === "freewrite") {
         categoryRow.style.display     = "";
         exerciseCatRow.style.display  = "none";
         exerciseNav.style.display     = "none";
         newPromptBtn.textContent      = "New prompt";
+        newPromptBtn.style.display    = "";
         const t = getWordTarget();
         wordTarget.textContent        = t.label;
         editor.placeholder            = `Start writing… (${t.label.replace("Target: ", "").toLowerCase()} is a good target)`;
@@ -1706,6 +1994,148 @@
       triggerAutoSave();
     });
 
+    // ─── CRACK MODE ─────────────────────────────────────────────────────────────
+
+    const crackStarters = [
+      "Two people want the same person. Build the story.",
+      "A soldier defends a town he knows will fall. What keeps him there?",
+      "Everyone wakes up able to read other people's minds. Map the story.",
+      "Mario, from the point of view of the Goomba.",
+      "Tom and Jerry — but tell Jerry's story. What does he actually want?",
+      "Two people who hate each other need each other to survive.",
+      "A character does the right thing for entirely the wrong reason.",
+      "Someone discovers they have been the antagonist all along.",
+      "Write the villain's version of a fairy tale.",
+      "A character gets exactly what they wanted — and it ruins them."
+    ];
+
+    let crackHistory  = [];   // [{role, content}]
+    let crackEstablished = [];
+    let crackOpen        = [];
+
+    function initCrackStarters() {
+      const grid = document.getElementById("crackStarterGrid");
+      grid.innerHTML = "";
+      crackStarters.forEach(s => {
+        const btn = document.createElement("button");
+        btn.className   = "crack-starter-btn";
+        btn.textContent = s;
+        btn.addEventListener("click", () => sendCrackMessage(s));
+        grid.appendChild(btn);
+      });
+    }
+
+    function addCrackMessage(role, text, thinking = false) {
+      const messages = document.getElementById("crackMessages");
+      const starters = document.getElementById("crackStarters");
+
+      // First message — swap starters for messages panel
+      if (starters.style.display !== "none") {
+        starters.style.display = "none";
+        messages.style.display = "";
+      }
+
+      const div = document.createElement("div");
+      div.className = `crack-msg crack-msg-${role}${thinking ? " crack-thinking" : ""}`;
+      div.innerHTML = `
+        <span class="crack-msg-label">${role === "user" ? "You" : "The room"}</span>
+        <div class="crack-msg-bubble">${escapeHtml(text)}</div>
+      `;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+      return div;
+    }
+
+    function updateCrackSidebar(established, open) {
+      crackEstablished = established || crackEstablished;
+      crackOpen        = open        || crackOpen;
+
+      const eList = document.getElementById("establishedList");
+      const oList = document.getElementById("openList");
+
+      if (crackEstablished.length === 0) {
+        eList.innerHTML = `<li class="crack-empty">Nothing established yet.</li>`;
+      } else {
+        eList.innerHTML = crackEstablished.map(e => `<li>${escapeHtml(e)}</li>`).join("");
+      }
+
+      if (crackOpen.length === 0) {
+        oList.innerHTML = `<li class="crack-empty">No questions yet.</li>`;
+      } else {
+        oList.innerHTML = crackOpen.map(q => `<li class="crack-open">${escapeHtml(q)}</li>`).join("");
+      }
+    }
+
+    async function sendCrackMessage(text) {
+      if (!text.trim()) return;
+
+      const sendBtn  = document.getElementById("crackSendBtn");
+      const input    = document.getElementById("crackInput");
+      input.value    = "";
+      input.style.height = "";
+      sendBtn.disabled   = true;
+
+      addCrackMessage("user", text);
+      crackHistory.push({ role: "user", content: text });
+
+      const thinkingEl = addCrackMessage("ai", "Thinking…", true);
+
+      try {
+        const response = await fetch("/crack", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: crackHistory })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Something went wrong.");
+
+        // Replace thinking bubble with real reply
+        thinkingEl.querySelector(".crack-msg-bubble").textContent = data.reply;
+        thinkingEl.classList.remove("crack-thinking");
+
+        crackHistory.push({ role: "assistant", content: data.reply });
+        updateCrackSidebar(data.established, data.open);
+      } catch (err) {
+        thinkingEl.querySelector(".crack-msg-bubble").textContent = `Error: ${err.message}`;
+        thinkingEl.classList.remove("crack-thinking");
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    }
+
+    function resetCrack() {
+      crackHistory     = [];
+      crackEstablished = [];
+      crackOpen        = [];
+      document.getElementById("crackMessages").innerHTML = "";
+      document.getElementById("crackMessages").style.display = "none";
+      document.getElementById("crackStarters").style.display = "";
+      updateCrackSidebar([], []);
+    }
+
+    // Crack input: Enter sends, Shift+Enter newlines, auto-resize
+    document.getElementById("crackInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        const text = e.target.value.trim();
+        if (text) sendCrackMessage(text);
+      }
+    });
+
+    document.getElementById("crackInput").addEventListener("input", (e) => {
+      e.target.style.height = "auto";
+      e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
+    });
+
+    document.getElementById("crackSendBtn").addEventListener("click", () => {
+      const text = document.getElementById("crackInput").value.trim();
+      if (text) sendCrackMessage(text);
+    });
+
+    document.getElementById("crackResetBtn").addEventListener("click", resetCrack);
+
     // ─── INIT ───────────────────────────────────────────────────────────────────
 
     initTheme();
@@ -1714,6 +2144,7 @@
     updateWordCount();
     updateReviewerButtons();
     showFreeWritePrompt();
+    initCrackStarters();
   </script>
 </body>
 </html>
