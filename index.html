@@ -1230,14 +1230,13 @@
 
         <div class="crack-main">
           <div class="crack-starters" id="crackStarters">
-            <p class="crack-intro">Pick a starting point, or describe your own idea in the box below.</p>
-            <div class="crack-starter-grid" id="crackStarterGrid"></div>
+            <p class="crack-intro">Tell me the story you want to tell. Let's work on it together. One sentence or fifty.</p>
           </div>
 
           <div class="crack-messages" id="crackMessages" style="display:none;"></div>
 
           <div class="crack-input-area">
-            <textarea class="crack-input" id="crackInput" placeholder="Describe a story idea, or respond…" rows="2"></textarea>
+            <textarea class="crack-input" id="crackInput" placeholder="Start anywhere…" rows="2"></textarea>
             <button class="crack-send-btn" id="crackSendBtn" type="button">Send</button>
           </div>
           <div class="crack-footer">
@@ -1996,34 +1995,9 @@
 
     // ─── CRACK MODE ─────────────────────────────────────────────────────────────
 
-    const crackStarters = [
-      "Two people want the same person. Build the story.",
-      "A soldier defends a town he knows will fall. What keeps him there?",
-      "Everyone wakes up able to read other people's minds. Map the story.",
-      "Mario, from the point of view of the Goomba.",
-      "Tom and Jerry — but tell Jerry's story. What does he actually want?",
-      "Two people who hate each other need each other to survive.",
-      "A character does the right thing for entirely the wrong reason.",
-      "Someone discovers they have been the antagonist all along.",
-      "Write the villain's version of a fairy tale.",
-      "A character gets exactly what they wanted — and it ruins them."
-    ];
-
     let crackHistory  = [];   // [{role, content}]
     let crackEstablished = [];
     let crackOpen        = [];
-
-    function initCrackStarters() {
-      const grid = document.getElementById("crackStarterGrid");
-      grid.innerHTML = "";
-      crackStarters.forEach(s => {
-        const btn = document.createElement("button");
-        btn.className   = "crack-starter-btn";
-        btn.textContent = s;
-        btn.addEventListener("click", () => sendCrackMessage(s));
-        grid.appendChild(btn);
-      });
-    }
 
     function addCrackMessage(role, text, thinking = false) {
       const messages = document.getElementById("crackMessages");
@@ -2144,7 +2118,6 @@
     updateWordCount();
     updateReviewerButtons();
     showFreeWritePrompt();
-    initCrackStarters();
   </script>
 </body>
 </html>
