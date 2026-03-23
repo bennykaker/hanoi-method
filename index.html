@@ -88,6 +88,16 @@
       font-size: 1.15rem;
       font-weight: 700;
       letter-spacing: 0.01em;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-sub {
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: var(--muted);
+      letter-spacing: 0;
     }
 
     .header-actions {
@@ -1079,7 +1089,10 @@
 <body>
   <main class="app">
     <header class="topbar">
-      <div class="brand">Hanoi Method</div>
+      <div class="brand">
+        Hanoi Method
+        <span class="brand-sub">We don't write it for you. We help you figure out what you're trying to write.</span>
+      </div>
 
       <div class="header-actions">
         <div class="mode-tabs" role="group" aria-label="Mode">
@@ -1231,6 +1244,7 @@
         <div class="crack-main">
           <div class="crack-starters" id="crackStarters">
             <p class="crack-intro">Tell me the story you want to tell. Let's work on it together. One sentence or fifty.</p>
+            <p class="crack-intro" style="margin-top: 10px;">We work on structure and ideas. The writing is yours.</p>
           </div>
 
           <div class="crack-messages" id="crackMessages" style="display:none;"></div>
