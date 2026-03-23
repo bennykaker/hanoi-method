@@ -533,6 +533,147 @@
       opacity: 1;
     }
 
+    /* ── Annotation view ───────────────────────────────────────────────────── */
+
+    .ann-summary {
+      font-size: 0.95rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ann-legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .ann-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .ann-legend-swatch {
+      width: 22px;
+      height: 0;
+      border-bottom-width: 2.5px;
+      border-bottom-style: solid;
+    }
+
+    .ann-legend-swatch.strength   { border-color: #22c55e; }
+    .ann-legend-swatch.issue      { border-color: #ef4444; border-bottom-style: dashed; }
+    .ann-legend-swatch.suggestion { border-color: #f59e0b; border-bottom-style: dotted; }
+
+    .ann-layout {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .ann-text {
+      font-size: 1rem;
+      line-height: 1.8;
+      word-break: break-word;
+    }
+
+    .ann-text p { margin: 0 0 1em; }
+    .ann-text p:last-child { margin-bottom: 0; }
+
+    mark.ann {
+      background: none;
+      padding-bottom: 1px;
+      border-radius: 1px;
+      cursor: default;
+      transition: background 0.15s ease;
+    }
+
+    mark.ann-strength   { border-bottom: 2.5px solid #22c55e; }
+    mark.ann-issue      { border-bottom: 2px dashed #ef4444; }
+    mark.ann-suggestion { border-bottom: 2px dotted #f59e0b; }
+
+    mark.ann-strength.ann-active   { background: rgba(34, 197, 94, 0.14); }
+    mark.ann-issue.ann-active      { background: rgba(239, 68, 68, 0.10); }
+    mark.ann-suggestion.ann-active { background: rgba(245, 158, 11, 0.12); }
+
+    html[data-theme="dark"] mark.ann-strength.ann-active   { background: rgba(34, 197, 94, 0.10); }
+    html[data-theme="dark"] mark.ann-issue.ann-active      { background: rgba(239, 68, 68, 0.08); }
+    html[data-theme="dark"] mark.ann-suggestion.ann-active { background: rgba(245, 158, 11, 0.08); }
+
+    sup.ann-num {
+      font-size: 0.65em;
+      font-weight: 700;
+      line-height: 1;
+      vertical-align: super;
+      margin-left: 1px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    /* Sidebar */
+    .ann-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .ann-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px 8px 12px;
+      font-size: 0.83rem;
+      line-height: 1.4;
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      cursor: default;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      background: var(--panel-soft);
+    }
+
+    .ann-card-strength   { border-left: 3px solid #22c55e; }
+    .ann-card-issue      { border-left: 3px solid #ef4444; }
+    .ann-card-suggestion { border-left: 3px solid #f59e0b; }
+
+    .ann-card.ann-active {
+      background: var(--panel);
+      border-color: var(--text);
+    }
+
+    .ann-card-num {
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: var(--muted);
+      flex-shrink: 0;
+      min-width: 14px;
+    }
+
+    .ann-card-comment { color: var(--text); }
+
+    /* No annotations fallback */
+    .ann-none {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-style: italic;
+      padding: 12px 0;
+    }
+
+    @media (max-width: 720px) {
+      .ann-layout {
+        grid-template-columns: 1fr;
+      }
+      .ann-sidebar {
+        border-top: 1px solid var(--border);
+        padding-top: 14px;
+      }
+    }
+
     /* Streaming cursor */
     .streaming-cursor::after {
       content: "▋";
@@ -1213,7 +1354,7 @@
       return promptText.textContent.trim();
     }
 
-    // ─── FEEDBACK FORMATTING ────────────────────────────────────────────────────
+    // ─── ANNOTATION RENDERING ───────────────────────────────────────────────────
 
     function escapeHtml(str) {
       return str
@@ -1222,46 +1363,80 @@
         .replace(/>/g, "&gt;");
     }
 
-    function formatFeedbackHtml(text) {
-      // Split into sections on double newline or numbered header
-      const sections = text.split(/\n{2,}/);
-      let html = "";
+    function buildAnnotatedView(writing, annotations, summary) {
+      // Find each annotation's position in the writing
+      const spans = [];
+      for (let i = 0; i < annotations.length; i++) {
+        const ann = annotations[i];
+        const idx = writing.indexOf(ann.text);
+        if (idx === -1) continue;
+        spans.push({ start: idx, end: idx + ann.text.length, comment: ann.comment, type: ann.type, num: spans.length + 1 });
+      }
 
-      for (const section of sections) {
-        const trimmed = section.trim();
-        if (!trimmed) continue;
+      // Sort by position, remove overlaps
+      spans.sort((a, b) => a.start - b.start);
+      const clean = [];
+      let lastEnd = 0;
+      for (const s of spans) {
+        if (s.start >= lastEnd) { clean.push(s); lastEnd = s.end; }
+      }
 
-        // Numbered section header: "1. Title" or "1. Title\n- item..."
-        const numbered = trimmed.match(/^(\d+\.\s+.+?)(\n[\s\S]+)?$/);
-        if (numbered) {
-          const headerLine = escapeHtml(numbered[1]);
-          const rest       = numbered[2] ? numbered[2].trim() : "";
-          const lines      = rest ? rest.split("\n").map(l => l.trim()).filter(Boolean) : [];
+      // Renumber after dedup
+      clean.forEach((s, i) => { s.num = i + 1; });
 
-          html += `<div class="feedback-section"><span class="feedback-section-head">${headerLine}</span>`;
+      // Build annotated text HTML
+      let textHtml = "";
+      let pos = 0;
+      for (const s of clean) {
+        textHtml += escapeHtml(writing.slice(pos, s.start));
+        textHtml += `<mark class="ann ann-${s.type}" data-ann="${s.num}">${escapeHtml(writing.slice(s.start, s.end))}<sup class="ann-num">${s.num}</sup></mark>`;
+        pos = s.end;
+      }
+      textHtml += escapeHtml(writing.slice(pos));
 
-          const bulletLines = lines.filter(l => l.startsWith("- ") || l.startsWith("• "));
-          const plainLines  = lines.filter(l => !l.startsWith("- ") && !l.startsWith("• "));
+      // Convert newlines to paragraphs
+      textHtml = textHtml.split(/\n\n+/).map(p => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
 
-          if (bulletLines.length) {
-            html += `<ul class="feedback-section-items">`;
-            for (const b of bulletLines) {
-              html += `<li>${escapeHtml(b.replace(/^[-•]\s+/, ""))}</li>`;
-            }
-            html += `</ul>`;
-          }
-
-          if (plainLines.length) {
-            html += `<p class="feedback-section-body">${escapeHtml(plainLines.join(" "))}</p>`;
-          }
-
-          html += `</div>`;
-        } else {
-          html += `<p class="feedback-section-body">${escapeHtml(trimmed)}</p>`;
+      // Build sidebar HTML
+      let sidebarHtml = "";
+      if (clean.length === 0) {
+        sidebarHtml = `<div class="ann-none">No specific phrases to mark — see summary below.</div>`;
+      } else {
+        for (const s of clean) {
+          sidebarHtml += `<div class="ann-card ann-card-${s.type}" data-ann="${s.num}"><span class="ann-card-num">${s.num}</span><span class="ann-card-comment">${escapeHtml(s.comment)}</span></div>`;
         }
       }
 
-      return html;
+      // Legend
+      const hasStrength   = clean.some(s => s.type === "strength");
+      const hasIssue      = clean.some(s => s.type === "issue");
+      const hasSuggestion = clean.some(s => s.type === "suggestion");
+      let legendHtml = `<div class="ann-legend">`;
+      if (hasStrength)   legendHtml += `<span class="ann-legend-item"><span class="ann-legend-swatch strength"></span>Strength</span>`;
+      if (hasIssue)      legendHtml += `<span class="ann-legend-item"><span class="ann-legend-swatch issue"></span>Issue</span>`;
+      if (hasSuggestion) legendHtml += `<span class="ann-legend-item"><span class="ann-legend-swatch suggestion"></span>Suggestion</span>`;
+      legendHtml += `</div>`;
+
+      return `
+        <div class="ann-summary">${escapeHtml(summary || "")}</div>
+        ${legendHtml}
+        <div class="ann-layout">
+          <div class="ann-text">${textHtml}</div>
+          <div class="ann-sidebar">${sidebarHtml}</div>
+        </div>
+      `;
+    }
+
+    function attachAnnotationHovers() {
+      feedbackBody.querySelectorAll("[data-ann]").forEach(el => {
+        el.addEventListener("mouseenter", () => {
+          const num = el.dataset.ann;
+          feedbackBody.querySelectorAll(`[data-ann="${num}"]`).forEach(e => e.classList.add("ann-active"));
+        });
+        el.addEventListener("mouseleave", () => {
+          feedbackBody.querySelectorAll("[data-ann]").forEach(e => e.classList.remove("ann-active"));
+        });
+      });
     }
 
     // ─── MODAL HELPERS ──────────────────────────────────────────────────────────
@@ -1347,50 +1522,7 @@
       editor.focus();
     }
 
-    // ─── STREAMING REVIEW ───────────────────────────────────────────────────────
-
-    async function fetchReviewStream(text, prompt, reviewer, onChunk, onDone, onError) {
-      try {
-        const response = await fetch("/review-stream", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, prompt, reviewer })
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || "Could not get feedback.");
-        }
-
-        const reader  = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop();
-
-          for (const line of lines) {
-            if (!line.startsWith("data: ")) continue;
-            const data = line.slice(6).trim();
-            if (data === "[DONE]")  { onDone(); return; }
-            if (data === "[ERROR]") { throw new Error("Server error during streaming."); }
-            try {
-              const event = JSON.parse(data);
-              if (event.delta) onChunk(event.delta);
-            } catch {}
-          }
-        }
-
-        onDone();
-      } catch (err) {
-        onError(err.message || "Something went wrong.");
-      }
-    }
+    // ─── ANNOTATED REVIEW ───────────────────────────────────────────────────────
 
     function showError(message) {
       errorBody.textContent = message;
@@ -1402,7 +1534,6 @@
       submitBtn.disabled = true;
       submitBtn.textContent = "Reviewing…";
 
-      // Pick a random wait message
       const [w1, w2] = waitingLines[Math.floor(Math.random() * waitingLines.length)];
       waitList.innerHTML = `<li>${w1}</li><li>${w2}</li>`;
 
@@ -1411,47 +1542,31 @@
       feedbackCard.classList.remove("steve-mode");
       errorCard.classList.remove("active");
 
-      let fullText = "";
-      let started  = false;
+      try {
+        const response = await fetch("/review-annotate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, prompt, reviewer })
+        });
 
-      await new Promise((resolve) => {
-        fetchReviewStream(
-          text, prompt, reviewer,
-          (delta) => {
-            if (!started) {
-              // First chunk — show feedback card
-              started = true;
-              statusCard.classList.remove("active");
-              feedbackHeading.textContent = reviewerMeta[reviewer].heading;
-              feedbackBody.textContent    = "";
-              feedbackBody.className      = "feedback-body streaming-cursor";
-              if (reviewer === "steve") feedbackCard.classList.add("steve-mode");
-              feedbackCard.classList.add("active");
-              updateReviewerButtons();
-              feedbackCard.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-            fullText += delta;
-            feedbackBody.textContent = fullText;
-          },
-          () => {
-            // Stream complete — format the feedback
-            statusCard.classList.remove("active");
-            feedbackBody.classList.remove("streaming-cursor");
-            feedbackBody.classList.add("formatted");
-            feedbackBody.innerHTML = formatFeedbackHtml(fullText);
-            submitBtn.disabled = false;
-            updateSubmitLabel();
-            resolve();
-          },
-          (err) => {
-            statusCard.classList.remove("active");
-            showError(err);
-            submitBtn.disabled = false;
-            updateSubmitLabel();
-            resolve();
-          }
-        );
-      });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Could not get feedback.");
+
+        feedbackHeading.textContent = reviewerMeta[reviewer].heading;
+        feedbackBody.className      = "feedback-body formatted";
+        feedbackBody.innerHTML      = buildAnnotatedView(text, data.annotations || [], data.summary || "");
+        if (reviewer === "steve") feedbackCard.classList.add("steve-mode");
+        feedbackCard.classList.add("active");
+        updateReviewerButtons();
+        attachAnnotationHovers();
+        feedbackCard.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (err) {
+        showError(err.message || "Something went wrong.");
+      } finally {
+        statusCard.classList.remove("active");
+        submitBtn.disabled = false;
+        updateSubmitLabel();
+      }
     }
 
     async function beginReview() {
